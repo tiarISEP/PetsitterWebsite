@@ -1,0 +1,53 @@
+/* General Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    color: #333;
+}
+
+header {
+    background-color: #F2A65A;
+    color: white;
+    padding: 1rem 5%;
+    display: flex;
+    justify-content: space-between;
+}
+
+nav ul {
+    list-style: none;
+    display: flex;
+    gap: 1.5rem;
+}
+
+nav a {
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+#hero {
+    text-align: center;
+    padding: 4rem 1rem;
+    background-color: #f4f4f4;
+}
+
+.services-grid {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    padding: 2rem;
+    flex-wrap: wrap;
+}
+
+.service-card {
+    border: 1px solid #ddd;
+    padding: 1.5rem;
+    width: 300px;
+    border-radius: 8px;
+}
