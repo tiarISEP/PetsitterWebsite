@@ -4,12 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- SEO de base obligatoire -->
-    <title>Titre de la page spécifique | PetSitter's Market</title>
-    <meta name="description" content="Description courte et incisive de la page (environ 155 caractères), vitale pour le SEO.">
+    <title>Login | Petsitter's Market</title>
+    <meta name="description" content="Sign in to your Petsitter's Market account to manage bookings and pet care services.">
     
     <!-- CSS & Favicon -->
-    <!-- Utilise des chemins relatifs absolus par rapport à la racine si tu as des sous-dossiers -->
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <!-- <link rel="icon" href="/favicon.ico" type="image/x-icon"> -->
 </head>
 <body class="account-page">
@@ -18,30 +18,21 @@
 
     <header>
         <div class="logo">
-            <!-- Le logo doit TOUJOURS ramener à l'accueil -->
-            <a href="/index.html" style="text-decoration: none; color: inherit;">PetSitter's Market</a> 
+            <a href="index.html" style="text-decoration: none; color: inherit;">PetSitter's Market</a> 
         </div>
         <nav aria-label="Navigation principale">
             <ul>
-                <!-- Utilise de vrais chemins pour le multi-pages -->
-                <li><a href="/index.html">Home</a></li>
-                <li><a href="/services.html">Services</a></li>
-                <li><a href="/contact.html">Contact</a></li>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="services.html">Services</a></li>
+                <li><a href="contact.html">Contact</a></li>
+                <li><a href="login.html" style="font-weight: 500; color: #772f1a; padding: 0.5rem 1rem;">Login</a></li>
+                <li><a href="create-account.html" style="background-color: #585123; color: white; padding: 0.5rem 1.5rem; border-radius: 8px; font-weight: 500; text-decoration: none;">Sign Up</a></li>
             </ul>
         </nav>
     </header>
 
     <!-- id="main-content" requis pour le lien d'évitement ci-dessus -->
     <main id="main-content">
-        
-        <!-- <h1>Titre Principal (Un seul H1 par page)</h1> -->
-
-        <!-- 
-            =================================================
-            CONTENU SPÉCIFIQUE À LA PAGE (À INSERER ICI)
-            ================================================= 
-        -->
-        
         <section>
             <div class="middle-content">
                 <h1>Welcome Back</h1>
@@ -85,7 +76,43 @@
     </main>
 
     <footer>
-        <p>&copy; 2026 PetSitter's Market. All rights reserved.</p>
+        <div class="footer-container">
+            <div class="footer-col brand-col">
+                <h2><i class="fas fa-paw"></i> Petsitter's Market</h2>
+                <p>Connecting pet owners with<br>trusted caregivers since 2020.</p>
+            </div>
+            <div class="footer-col">
+                <h3>Services</h3>
+                <a href="#">Pet Sitting</a>
+                <a href="#">Dog Walking</a>
+                <a href="#">Pet Grooming</a>
+                <a href="#">Vet Visits</a>
+            </div>
+            <div class="footer-col">
+                <h3>Company</h3>
+                <a href="#">About Us</a>
+                <a href="#">Contact</a>
+                <a href="#">Careers</a>
+                <a href="#">Privacy Policy</a>
+            </div>
+            <div class="footer-col">
+                <h3>Contact</h3>
+                <div class="contact-item">
+                    <i class="fas fa-phone-alt"></i> (555) 123-4567
+                </div>
+                <div class="contact-item">
+                    <i class="fas fa-envelope"></i> hello@petsittersmarket.com
+                </div>
+                <div class="social-icons">
+                    <a href="#"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            &copy; 2026 Petsitter's Market. All rights reserved.
+        </div>
     </footer>
 </body>
 </html>
