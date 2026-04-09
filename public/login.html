@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en"> 
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- SEO de base obligatoire -->
+    <title>Titre de la page spécifique | PetSitter's Market</title>
+    <meta name="description" content="Description courte et incisive de la page (environ 155 caractères), vitale pour le SEO.">
+    
+    <!-- CSS & Favicon -->
+    <!-- Utilise des chemins relatifs absolus par rapport à la racine si tu as des sous-dossiers -->
+    <link rel="stylesheet" href="css/style.css">
+    <!-- <link rel="icon" href="/favicon.ico" type="image/x-icon"> -->
+</head>
+<body class="account-page">
+    <!-- Accessibilité : Lien d'évitement -->
+    <a href="#main-content" class="skip-link" style="position: absolute; left: -9999px;">Aller au contenu principal</a>
+
+    <header>
+        <div class="logo">
+            <!-- Le logo doit TOUJOURS ramener à l'accueil -->
+            <a href="/index.html" style="text-decoration: none; color: inherit;">PetSitter's Market</a> 
+        </div>
+        <nav aria-label="Navigation principale">
+            <ul>
+                <!-- Utilise de vrais chemins pour le multi-pages -->
+                <li><a href="/index.html">Home</a></li>
+                <li><a href="/services.html">Services</a></li>
+                <li><a href="/contact.html">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- id="main-content" requis pour le lien d'évitement ci-dessus -->
+    <main id="main-content">
+        
+        <!-- <h1>Titre Principal (Un seul H1 par page)</h1> -->
+
+        <!-- 
+            =================================================
+            CONTENU SPÉCIFIQUE À LA PAGE (À INSERER ICI)
+            ================================================= 
+        -->
+        
+        <section>
+            <div class="middle-content">
+                <h1>Welcome Back</h1>
+                <p>Sign in to your Petsitter's Market account</p>
+
+                <form class="auth-form" action="#" method="post">
+                    <loginBox>
+                        <h2>Email address</h2>
+                        <input type="email" name="email" placeholder="Enter your email address" size="49"/>
+                    </loginBox>
+
+                    <loginBox>
+                        <h2>Password</h2>
+                        <input type="password" name="password" placeholder="Enter your password" size="49"/>
+                    </loginBox>
+
+                    <div class="form-footer-row">
+                        <div class="check-box">
+                            <input type="checkbox" name="remember-me" id="remember-me" />
+                            <label for="remember-me">Remember me</label>
+                        </div>
+
+                        <div class="forgot-row">
+                            <a href="#pwordForgoten">Forgot password?</a>
+                        </div>
+                    </div>
+
+                    <input type="submit" value="Sign in" class="cta-button" />
+
+                    <div class="divider">or</div>
+
+                    <div class="social-row">
+                        <button type="button" class="social-button google-login">Google</button>
+                        <button type="button" class="social-button facebook-login">Facebook</button>
+                    </div>
+
+                    <p class="signin-copy">Don't have an account? <a href="create-account.html">Create one here</a></p>
+                </form>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 PetSitter's Market. All rights reserved.</p>
+    </footer>
+</body>
+</html>

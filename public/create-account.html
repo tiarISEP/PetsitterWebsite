@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en"> 
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- SEO de base obligatoire -->
+    <title>Titre de la page spécifique | PetSitter's Market</title>
+    <meta name="description" content="Description courte et incisive de la page (environ 155 caractères), vitale pour le SEO.">
+    
+    <!-- CSS & Favicon -->
+    <!-- Utilise des chemins relatifs absolus par rapport à la racine si tu as des sous-dossiers -->
+    <link rel="stylesheet" href="css/style.css">
+    <!-- <link rel="icon" href="/favicon.ico" type="image/x-icon"> -->
+</head>
+<body class="account-page">
+    <!-- Accessibilité : Lien d'évitement -->
+    <a href="#main-content" class="skip-link" style="position: absolute; left: -9999px;">Aller au contenu principal</a>
+
+    <header>
+        <div class="logo">
+            <!-- Le logo doit TOUJOURS ramener à l'accueil -->
+            <a href="/index.html" style="text-decoration: none; color: inherit;">PetSitter's Market</a> 
+        </div>
+        <nav aria-label="Navigation principale">
+            <ul>
+                <!-- Utilise de vrais chemins pour le multi-pages -->
+                <li><a href="/index.html">Home</a></li>
+                <li><a href="/services.html">Services</a></li>
+                <li><a href="/contact.html">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- id="main-content" requis pour le lien d'évitement ci-dessus -->
+    <main id="main-content">
+        <section>
+            <div class="middle-content">
+
+                <h1>Create Your Account</h1>
+                <p>Join our community of pet lovers</p>
+
+                <form class="auth-form" action="#" method="post">
+                    <p class="small-label">I am a:</p>
+                    <div class="user-type-row">
+                        <button class="user-type-button selected" type="button" data-type="pet-owner">
+                            <span>❤</span>
+                            <strong>Pet Owner</strong>
+                            <small>Find trusted sitters</small>
+                        </button>
+                        <button class="user-type-button" type="button" data-type="pet-sitter">
+                            <span>🤝</span>
+                            <strong>Pet Sitter</strong>
+                            <small>Earn caring for pets</small>
+                        </button>
+                    </div>
+
+                    <loginBox>
+                        <h2>Username</h2>
+                        <input type="text" name="username" placeholder="Choose a username" size="49"/>
+                    </loginBox>
+
+                    <loginBox>
+                        <h2>Email Address</h2>
+                        <input type="email" name="email" placeholder="Enter your email" size="49"/>
+                    </loginBox>
+
+                    <loginBox>
+                        <h2>Password</h2>
+                        <input type="password" name="password" placeholder="Create a password" size="49"/>
+                    </loginBox>
+
+                    <loginBox>
+                        <h2>Confirm Password</h2>
+                        <input type="password" name="confirm_password" placeholder="Confirm your password" size="49"/>
+                    </loginBox>
+
+                    <div class="check-box">
+                        <input type="checkbox" name="terms-conditions" id="terms-conditions" />
+                        <label for="terms-conditions">I agree to the Terms of Service and Privacy Policy</label>
+                    </div>
+
+                    <input type="submit" value="Create Account" class="cta-button" />
+                </form>
+
+                <p class="signin-copy">Already have an account? <a href="login.html">Sign in</a></p>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 PetSitter's Market. All rights reserved.</p>
+    </footer>
+</body>
+</html>
