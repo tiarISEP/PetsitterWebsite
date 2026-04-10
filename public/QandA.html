@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en"> 
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- SEO de base obligatoire -->
+    <title>FaQ | PetSitter's Market</title>
+    <meta name="description" content="Description courte et incisive de la page (environ 155 caractères), vitale pour le SEO.">
+    
+    <!-- CSS & Favicon -->
+    <!-- Utilise des chemins relatifs absolus par rapport à la racine si tu as des sous-dossiers -->
+    <link rel="stylesheet" href="css/style.css">
+    <!-- <link rel="icon" href="/favicon.ico" type="image/x-icon"> -->
+     
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #333;
+        }
+        .faq-item {
+            border-bottom: 1px solid #ddd;
+        }
+        .faq-question {
+            background: #f1f1f1;
+            padding: 15px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+        .faq-question:hover {
+            background: #e2e2e2;
+        }
+        .faq-answer {
+            display: none;
+            padding: 15px;
+            background: #fff;
+            color: #555;
+        }
+        .faq-answer.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <!-- Accessibilité : Lien d'évitement -->
+    <a href="#main-content" class="skip-link" style="position: absolute; left: -9999px;">Aller au contenu principal</a>
+
+    <header>
+        <div class="logo">
+            <!-- Le logo doit TOUJOURS ramener à l'accueil -->
+            <a href="/index.html" style="text-decoration: none; color: inherit;">PetSitter's Market</a> 
+        </div>
+        <nav aria-label="Navigation principale">
+            <ul>
+                <!-- Utilise de vrais chemins pour le multi-pages -->
+                <li><a href="/index.html">Home</a></li>
+                <li><a href="/services.html">Services</a></li>
+                <li><a href="/contact.html">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- id="main-content" requis pour le lien d'évitement ci-dessus -->
+    <main id="main-content">
+        <!-- 
+            =================================================
+            CONTENU SPÉCIFIQUE À LA PAGE (À INSERER ICI)
+            ================================================= 
+        -->
+    <h1>Frequently asked questions:</h1>
+<div class="container">
+
+    <div class="faq-item">
+        <div class="faq-question">Test Question 1</div>
+        <div class="faq-answer">Test Answer 1</div>
+    </div>
+
+    <div class="faq-item">
+        <div class="faq-question">Test Question 2</div>
+        <div class="faq-answer">Test Answer 2</div>
+    </div>
+
+    <div class="faq-item">
+        <div class="faq-question">Test Question 3</div>
+        <div class="faq-answer">Test Answer 3</div>
+    </div>
+
+    <div class="faq-item">
+        <div class="faq-question">Test Question 4</div>
+        <div class="faq-answer">Test Answer 4</div>
+    </div>
+</div>
+
+<script>
+    // Accordion functionality
+    document.querySelectorAll('.faq-question').forEach(question => {
+        question.addEventListener('click', () => {
+            const answer = question.nextElementSibling;
+            answer.classList.toggle('show');
+        });
+    });
+</script>
+
+</body>
+</html>
