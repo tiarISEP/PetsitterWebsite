@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sitter Dashboard | Petsitter's Market</title>
+  <meta name="description" content="Find pet sitting opportunities and manage your applications.">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+
+  <a href="#main-content" class="skip-link">Aller au contenu principal</a>
+
+  <header>
+    <div class="logo">
+      <a href="index.html"><i class="fas fa-paw" style="color:#F58549;"></i> PetSitter's Market</a>
+    </div>
+    <nav class="header-nav-sitter" aria-label="Navigation sitter">
+      <a href="#">Find Jobs</a>
+      <a href="#">My Applications</a>
+      <a href="#">Messages</a>
+      <a href="#">Profile</a>
+    </nav>
+    <div class="header-user">
+      <img class="header-avatar" src="" alt="John Doe">
+      <span class="header-user-name" style="color:#585123;">John Doe</span>
+      <button style="background:none;border:none;cursor:pointer;margin-left:8px;">
+        <i class="fas fa-chevron-down" style="color:#585123;"></i>
+      </button>
+    </div>
+  </header>
+
+  <main id="main-content" class="sitter-main">
+
+    <div class="dashboard-heading">
+      <h1 style="font-family:'Inter',sans-serif; color:#772F1A;">Sitter Dashboard</h1>
+      <p style="color:#585123;">Find pet sitting opportunities and manage your applications</p>
+    </div>
+
+    <!-- Barre de recherche -->
+    <div class="search-bar-card">
+      <div class="search-bar-inner">
+        <div class="search-input-wrap">
+          <i class="fas fa-search"></i>
+          <input type="text" class="search-input" placeholder="Search pet sitting jobs...">
+        </div>
+        <select class="search-select">
+          <option>All Locations</option>
+          <option>Manhattan</option>
+          <option>Brooklyn</option>
+          <option>Queens</option>
+        </select>
+        <select class="search-select">
+          <option>All Pets</option>
+          <option>Dogs</option>
+          <option>Cats</option>
+          <option>Birds</option>
+        </select>
+        <button class="btn btn-secondary" style="height:50px; padding:0 24px;">Search</button>
+      </div>
+    </div>
+
+    <!-- Grid 2 colonnes -->
+    <div class="sitter-content-grid">
+
+      <!-- Colonne gauche : My Applications -->
+      <div class="applications-panel">
+        <h2>My Applications</h2>
+
+        <div class="app-item">
+          <div class="app-item-header">
+            <span class="app-item-title">Golden Retriever Care</span>
+            <span class="badge badge-pending">Pending</span>
+          </div>
+          <div class="app-item-location"><i class="fas fa-map-marker-alt"></i> Brooklyn, NY &bull; 3 days</div>
+          <div class="app-item-price">$75/day</div>
+        </div>
+
+        <div class="app-item">
+          <div class="app-item-header">
+            <span class="app-item-title">Cat Sitting Weekend</span>
+            <span class="badge badge-accepted">Accepted</span>
+          </div>
+          <div class="app-item-location"><i class="fas fa-map-marker-alt"></i> Manhattan, NY &bull; 2 days</div>
+          <div class="app-item-price">$50/day</div>
+        </div>
+
+        <div class="app-item">
+          <div class="app-item-header">
+            <span class="app-item-title">Puppy Training Help</span>
+            <span class="badge badge-rejected">Rejected</span>
+          </div>
+          <div class="app-item-location"><i class="fas fa-map-marker-alt"></i> Queens, NY &bull; 5 days</div>
+          <div class="app-item-price">$60/day</div>
+        </div>
+
+        <div class="app-item">
+          <div class="app-item-header">
+            <span class="app-item-title">Bird Care Service</span>
+            <span class="badge badge-pending">Pending</span>
+          </div>
+          <div class="app-item-location"><i class="fas fa-map-marker-alt"></i> Bronx, NY &bull; 7 days</div>
+          <div class="app-item-price">$40/day</div>
+        </div>
+
+        <button class="view-all-btn">View All Applications</button>
+      </div>
+
+      <!-- Colonne droite : Available Jobs -->
+      <div class="jobs-panel">
+        <div class="jobs-panel-header">
+          <h2>Available Jobs</h2>
+          <span class="jobs-count">24 jobs found</span>
+        </div>
+
+        <!-- Job 1 -->
+        <div class="job-card">
+          <div class="job-card-top">
+            <div class="job-card-info">
+              <img class="job-pet-img" src="" alt="Golden Retriever">
+              <div>
+                <div class="job-title">Golden Retriever Sitting</div>
+                <div class="job-location"><i class="fas fa-map-marker-alt"></i> Upper East Side, Manhattan</div>
+                <div class="job-dates"><i class="fas fa-calendar"></i> Dec 15-20 &nbsp;<i class="fas fa-clock"></i> 5 days</div>
+              </div>
+            </div>
+            <div class="job-price">
+              <div class="job-price-amount">$80</div>
+              <div class="job-price-per">per day</div>
+            </div>
+          </div>
+          <p class="job-description">Looking for an experienced sitter for my friendly Golden Retriever. Daily walks, feeding, and companionship required.</p>
+          <div class="job-card-footer">
+            <div class="job-tags">
+              <span class="tag-dog"><i class="fas fa-dog"></i> Dog</span>
+              <span class="tag-experienced">Experienced</span>
+            </div>
+            <button class="btn btn-secondary btn-sm">Apply</button>
+          </div>
+        </div>
+
+        <!-- Job 2 -->
+        <div class="job-card">
+          <div class="job-card-top">
+            <div class="job-card-info">
+              <img class="job-pet-img" src="" alt="Cat">
+              <div>
+                <div class="job-title">Weekend Cat Care</div>
+                <div class="job-location"><i class="fas fa-map-marker-alt"></i> Brooklyn Heights</div>
+                <div class="job-dates"><i class="fas fa-calendar"></i> Dec 18-19 &nbsp;<i class="fas fa-clock"></i> 2 days</div>
+              </div>
+            </div>
+            <div class="job-price">
+              <div class="job-price-amount">$55</div>
+              <div class="job-price-per">per day</div>
+            </div>
+          </div>
+          <p class="job-description">Need someone to check on my two cats over the weekend. Feeding and litter box cleaning required.</p>
+          <div class="job-card-footer">
+            <div class="job-tags">
+              <span class="tag-cat"><i class="fas fa-cat"></i> Cat</span>
+              <span class="tag-beginner">Beginner</span>
+            </div>
+            <button class="btn btn-secondary btn-sm">Apply</button>
+          </div>
+        </div>
+
+        <!-- Job 3 -->
+        <div class="job-card">
+          <div class="job-card-top">
+            <div class="job-card-info">
+              <img class="job-pet-img" src="" alt="Puppy">
+              <div>
+                <div class="job-title">Puppy Training &amp; Care</div>
+                <div class="job-location"><i class="fas fa-map-marker-alt"></i> Midtown West</div>
+                <div class="job-dates"><i class="fas fa-calendar"></i> Dec 22-28 &nbsp;<i class="fas fa-clock"></i> 7 days</div>
+              </div>
+            </div>
+            <div class="job-price">
+              <div class="job-price-amount">$95</div>
+              <div class="job-price-per">per day</div>
+            </div>
+          </div>
+          <p class="job-description">Young puppy needs training help and constant supervision. Experience with puppy training preferred.</p>
+          <div class="job-card-footer">
+            <div class="job-tags">
+              <span class="tag-dog"><i class="fas fa-dog"></i> Dog</span>
+              <span class="tag-expert">Expert</span>
+            </div>
+            <button class="btn btn-secondary btn-sm">Apply</button>
+          </div>
+        </div>
+
+        <div style="text-align:center; margin-top: 8px;">
+          <button class="btn btn-ghost">Load More Jobs</button>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer-olive">
+    <div class="footer-container">
+      <div class="footer-col brand-col">
+        <h2><i class="fas fa-paw"></i> Petsitter's Market</h2>
+        <p>Connecting pet owners with trusted sitters for safe, loving care.</p>
+      </div>
+      <div class="footer-col">
+        <h3>For Sitters</h3>
+        <a href="#">Find Jobs</a>
+        <a href="#">Sitter Guide</a>
+        <a href="#">Safety Tips</a>
+      </div>
+      <div class="footer-col">
+        <h3>Support</h3>
+        <a href="#">Help Center</a>
+        <a href="#">Contact Us</a>
+        <a href="#">Privacy Policy</a>
+      </div>
+    </div>
+    <div class="footer-bottom">&copy; 2026 Petsitter's Market. All rights reserved.</div>
+  </footer>
+
+</body>
+</html>

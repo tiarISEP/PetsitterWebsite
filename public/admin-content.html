@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Content Management | Petsitter's Market Admin</title>
+  <meta name="description" content="Admin panel - Manage FAQ and Terms & Conditions.">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+
+  <a href="#main-content" class="skip-link">Aller au contenu principal</a>
+
+  <header>
+    <div class="logo">
+      <a href="#"><i class="fas fa-paw"></i> PetSitter's Market</a>
+    </div>
+    <nav class="header-nav-admin" aria-label="Navigation admin">
+      <a href="#">Dashboard</a>
+      <a href="#">Users</a>
+      <a href="#">Bookings</a>
+      <a href="#">Content</a>
+    </nav>
+    <div class="header-user">
+      <img class="header-avatar" src="" alt="Admin">
+      <span class="header-user-name" style="color:#585123;">Admin</span>
+      <button style="background:none;border:none;cursor:pointer;margin-left:8px;">
+        <i class="fas fa-chevron-down" style="color:#585123;"></i>
+      </button>
+    </div>
+  </header>
+
+  <div class="dashboard-layout">
+
+    <!-- Sidebar Admin -->
+    <aside class="sidebar">
+      <a href="#" class="sidebar-nav-item active">
+        <i class="fas fa-tachometer-alt"></i> Dashboard
+      </a>
+      <a href="#" class="sidebar-nav-item">
+        <i class="fas fa-users"></i> Users
+      </a>
+      <a href="#" class="sidebar-nav-item">
+        <i class="fas fa-calendar-check"></i> Bookings
+      </a>
+      <a href="#" class="sidebar-nav-item">
+        <i class="fas fa-paw"></i> Pet Sitters
+      </a>
+      <a href="#" class="sidebar-nav-item active-sub">
+        <div class="nav-icon-row">
+          <i class="fas fa-edit"></i>
+          <span>Content<br>Management</span>
+        </div>
+      </a>
+      <a href="#" class="sidebar-nav-item">
+        <i class="fas fa-chart-bar"></i> Analytics
+      </a>
+      <a href="#" class="sidebar-nav-item">
+        <i class="fas fa-cog"></i> Settings
+      </a>
+    </aside>
+
+    <!-- Main content -->
+    <main id="main-content" class="dashboard-main">
+      <div class="dashboard-heading">
+        <h1 style="font-family:'Inter',sans-serif;">Content Management</h1>
+        <p>Manage FAQ items and Terms &amp; Conditions</p>
+      </div>
+
+      <div class="admin-content-grid">
+
+        <!-- Panel FAQ -->
+        <div class="card" style="margin-bottom:0;">
+          <div class="card-header">
+            <h3 class="card-title">FAQ Management</h3>
+            <button class="btn btn-primary btn-sm">
+              <i class="fas fa-plus"></i> Add FAQ
+            </button>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-item-inner">
+              <div class="faq-item-content">
+                <div class="faq-item-question">How do I book a pet sitter?</div>
+                <div class="faq-item-answer">Browse available sitters, check their profiles and reviews, then send a booking request...</div>
+              </div>
+              <div class="faq-item-actions">
+                <button class="btn btn-sm" style="color:#F2A65A;"><i class="fas fa-edit"></i></button>
+                <button class="btn btn-sm" style="color:#EF4444;"><i class="fas fa-trash"></i></button>
+              </div>
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-item-inner">
+              <div class="faq-item-content">
+                <div class="faq-item-question">What happens if my pet gets sick?</div>
+                <div class="faq-item-answer">All our pet sitters are trained to handle emergencies and will contact you immediately...</div>
+              </div>
+              <div class="faq-item-actions">
+                <button class="btn btn-sm" style="color:#F2A65A;"><i class="fas fa-edit"></i></button>
+                <button class="btn btn-sm" style="color:#EF4444;"><i class="fas fa-trash"></i></button>
+              </div>
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-item-inner">
+              <div class="faq-item-content">
+                <div class="faq-item-question">How much does pet sitting cost?</div>
+                <div class="faq-item-answer">Prices vary by location and services. Check individual sitter profiles for rates...</div>
+              </div>
+              <div class="faq-item-actions">
+                <button class="btn btn-sm" style="color:#F2A65A;"><i class="fas fa-edit"></i></button>
+                <button class="btn btn-sm" style="color:#EF4444;"><i class="fas fa-trash"></i></button>
+              </div>
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-item-inner">
+              <div class="faq-item-content">
+                <div class="faq-item-question">Are pet sitters insured?</div>
+                <div class="faq-item-answer">Yes, all verified pet sitters on our platform are covered by insurance...</div>
+              </div>
+              <div class="faq-item-actions">
+                <button class="btn btn-sm" style="color:#F2A65A;"><i class="fas fa-edit"></i></button>
+                <button class="btn btn-sm" style="color:#EF4444;"><i class="fas fa-trash"></i></button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Panel Terms & Conditions -->
+        <div class="card" style="margin-bottom:0;">
+          <div class="card-header" style="border-bottom:1px solid #F3F4F6; padding-bottom:24px; margin-bottom:24px;">
+            <div>
+              <h3 class="card-title">Terms &amp; Conditions</h3>
+              <p style="font-family:'Inter',sans-serif; font-size:14px; color:#4B5563; margin-top:4px;">Update general terms and conditions</p>
+            </div>
+          </div>
+
+          <textarea class="terms-textarea">Welcome to Petsitter's Market. By using our services, you agree to the following terms:
+
+1. Service Agreement
+Our platform connects pet owners with verified pet sitters. We facilitate bookings but are not responsible for the actual pet care services provided.
+
+2. User Responsibilities
+- Pet owners must provide accurate information about their pets
+- Pet sitters must maintain professional standards
+- All users must treat each other with respect
+
+3. Payment Terms
+- Payments are processed securely through our platform
+- Service fees apply to all transactions
+- Refunds are subject to our cancellation policy
+
+4. Liability
+- Pet sitters are responsible for the care of pets during agreed periods
+- Insurance coverage is recommended for all parties involved</textarea>
+
+          <div class="form-actions">
+            <button class="btn btn-cancel">Cancel</button>
+            <button class="btn btn-primary">
+              <i class="fas fa-save"></i> Save Changes
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <footer>
+    <div class="footer-container">
+      <div class="footer-col brand-col">
+        <h2><i class="fas fa-paw"></i> Petsitter's Market</h2>
+        <p>Connecting pet owners with trusted caregivers since 2020.</p>
+      </div>
+      <div class="footer-col">
+        <h3>Services</h3>
+        <a href="#">Pet Sitting</a>
+        <a href="#">Dog Walking</a>
+        <a href="#">Pet Grooming</a>
+        <a href="#">Vet Visits</a>
+      </div>
+      <div class="footer-col">
+        <h3>Company</h3>
+        <a href="#">About Us</a>
+        <a href="#">Contact</a>
+        <a href="#">Careers</a>
+        <a href="#">Privacy Policy</a>
+      </div>
+      <div class="footer-col">
+        <h3>Contact</h3>
+        <div class="contact-item"><i class="fas fa-phone-alt"></i> (555) 123-4567</div>
+        <div class="contact-item"><i class="fas fa-envelope"></i> hello@petsittersmarket.com</div>
+        <div class="social-icons">
+          <a href="#"><i class="fab fa-facebook-f"></i></a>
+          <a href="#"><i class="fab fa-instagram"></i></a>
+          <a href="#"><i class="fab fa-twitter"></i></a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">&copy; 2026 Petsitter's Market. All rights reserved.</div>
+  </footer>
+
+</body>
+</html>

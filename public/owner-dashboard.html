@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Owner Dashboard | Petsitter's Market</title>
+  <meta name="description" content="Manage your pets, ads, and applications on Petsitter's Market.">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+
+  <a href="#main-content" class="skip-link">Aller au contenu principal</a>
+
+  <header>
+    <div class="logo">
+      <a href="index.html"><i class="fas fa-paw"></i> PetSitter's Market</a>
+    </div>
+    <nav aria-label="Navigation principale">
+      <ul>
+        <li><a href="index.html">Find Sitters</a></li>
+        <li><a href="#">How It Works</a></li>
+        <li><a href="#">About</a></li>
+      </ul>
+    </nav>
+    <div class="header-user">
+      <img class="header-avatar" src="" alt="Sarah Johnson">
+      <span class="header-user-name">Sarah Johnson</span>
+      <button style="background:none;border:none;cursor:pointer;margin-left:8px;">
+        <i class="fas fa-chevron-down" style="color:#585123;"></i>
+      </button>
+    </div>
+  </header>
+
+  <div class="dashboard-layout">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-user">
+        <img class="sidebar-avatar" src="" alt="Sarah Johnson">
+        <div>
+          <div class="sidebar-user-name">Sarah Johnson</div>
+          <div class="sidebar-user-role">Pet Owner</div>
+        </div>
+      </div>
+
+      <a href="#" class="sidebar-nav-item active">
+        <i class="fas fa-home"></i> Dashboard
+      </a>
+      <a href="#" class="sidebar-nav-item">
+        <i class="fas fa-paw"></i> My Pets
+      </a>
+      <a href="#" class="sidebar-nav-item">
+        <i class="fas fa-bullhorn"></i> My Ads
+      </a>
+      <a href="#" class="sidebar-nav-item">
+        <i class="fas fa-file-alt"></i> Applications
+      </a>
+      <a href="#" class="sidebar-nav-item">
+        <i class="fas fa-calendar-alt"></i> Bookings
+      </a>
+      <a href="#" class="sidebar-nav-item">
+        <i class="fas fa-cog"></i> Settings
+      </a>
+    </aside>
+
+    <!-- Main content -->
+    <main id="main-content" class="dashboard-main">
+      <div class="dashboard-heading">
+        <h2>Owner Dashboard</h2>
+        <p>Manage your pets, ads, and applications</p>
+      </div>
+
+      <div class="dashboard-sections">
+
+        <!-- Section My Pets -->
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">My Pets</h3>
+            <button class="btn btn-secondary btn-sm">
+              <i class="fas fa-plus"></i> Add Pet
+            </button>
+          </div>
+          <div class="pets-grid">
+            <div class="pet-item">
+              <div class="pet-avatar-wrap">
+                <img src="" alt="Max">
+              </div>
+              <span class="pet-name">Max</span>
+              <span class="pet-type">Dog</span>
+            </div>
+            <div class="pet-item">
+              <div class="pet-avatar-wrap">
+                <img src="" alt="Luna">
+              </div>
+              <span class="pet-name">Luna</span>
+              <span class="pet-type">Cat</span>
+            </div>
+            <div class="pet-item">
+              <div class="pet-avatar-wrap">
+                <img src="" alt="Charlie">
+              </div>
+              <span class="pet-name">Charlie</span>
+              <span class="pet-type">Dog</span>
+            </div>
+            <div class="pet-item">
+              <div class="pet-avatar-wrap">
+                <img src="" alt="Bella">
+              </div>
+              <span class="pet-name">Bella</span>
+              <span class="pet-type">Cat</span>
+            </div>
+            <div class="pet-item">
+              <button class="pet-add-btn">
+                <i class="fas fa-plus"></i>
+                <span>Add</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section My Ads -->
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">My Ads</h3>
+            <button class="btn btn-primary btn-sm">
+              <i class="fas fa-plus"></i> Create New Ad
+            </button>
+          </div>
+
+          <!-- Ad 1 — Open -->
+          <div class="ad-row">
+            <div class="ad-row-info">
+              <div class="ad-row-title">
+                <h3>Weekend Care for Max &amp; Charlie</h3>
+                <span class="badge badge-open">Open</span>
+              </div>
+              <div class="ad-row-meta">Dec 15-17, 2024 &bull; 2 Dogs &bull; Home Visit</div>
+              <div class="ad-row-footer">
+                <span><i class="fas fa-user"></i> 5 Applications</span>
+                <span><i class="fas fa-clock"></i> Posted 2 days ago</span>
+              </div>
+            </div>
+            <div class="ad-row-actions">
+              <button class="btn btn-outline btn-sm"><i class="fas fa-edit"></i> Edit</button>
+              <button class="btn btn-sm" style="color:#772F1A;"><i class="fas fa-trash"></i></button>
+            </div>
+          </div>
+
+          <!-- Ad 2 — Open -->
+          <div class="ad-row">
+            <div class="ad-row-info">
+              <div class="ad-row-title">
+                <h3>Daily Walks for Luna</h3>
+                <span class="badge badge-open">Open</span>
+              </div>
+              <div class="ad-row-meta">Dec 20-30, 2024 &bull; 1 Cat &bull; Daily Visits</div>
+              <div class="ad-row-footer">
+                <span><i class="fas fa-user"></i> 3 Applications</span>
+                <span><i class="fas fa-clock"></i> Posted 5 days ago</span>
+              </div>
+            </div>
+            <div class="ad-row-actions">
+              <button class="btn btn-outline btn-sm"><i class="fas fa-edit"></i> Edit</button>
+              <button class="btn btn-sm" style="color:#772F1A;"><i class="fas fa-trash"></i></button>
+            </div>
+          </div>
+
+          <!-- Ad 3 — Closed -->
+          <div class="ad-row closed">
+            <div class="ad-row-info">
+              <div class="ad-row-title">
+                <h3>Holiday Care for Bella</h3>
+                <span class="badge badge-closed">Closed</span>
+              </div>
+              <div class="ad-row-meta">Nov 24-28, 2024 &bull; 1 Cat &bull; Boarding</div>
+              <div class="ad-row-footer">
+                <span><i class="fas fa-check-circle" style="color:#16A34A;"></i> Completed</span>
+                <span><i class="fas fa-clock"></i> Posted 20 days ago</span>
+              </div>
+            </div>
+            <div class="ad-row-actions">
+              <button class="btn btn-sm" style="color:#772F1A;">
+                <i class="fas fa-eye"></i> View
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section Incoming Applications -->
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Incoming Applications</h3>
+            <span class="badge-pill">8 New</span>
+          </div>
+
+          <!-- Applicant 1 -->
+          <div class="application-row">
+            <div class="application-row-left">
+              <img class="applicant-avatar" src="" alt="John Doe">
+              <div>
+                <div class="applicant-name-row">
+                  <span class="applicant-name">John Doe</span>
+                  <span class="applicant-rating"><i class="fas fa-star"></i> 4.9</span>
+                </div>
+                <div class="applicant-applied-for">Applied for: Weekend Care for Max &amp; Charlie</div>
+                <div class="applicant-stats">5 years experience &bull; 127 completed jobs &bull; Verified ID</div>
+                <div class="applicant-message">"I have extensive experience with large dogs and would love to care for Max and Charlie!"</div>
+              </div>
+            </div>
+            <div class="application-actions">
+              <button class="btn btn-success btn-sm"><i class="fas fa-check"></i> Accept</button>
+              <button class="btn btn-danger btn-sm"><i class="fas fa-times"></i> Reject</button>
+            </div>
+          </div>
+
+          <!-- Applicant 2 -->
+          <div class="application-row">
+            <div class="application-row-left">
+              <img class="applicant-avatar" src="" alt="Emily Roberts">
+              <div>
+                <div class="applicant-name-row">
+                  <span class="applicant-name">Emily Roberts</span>
+                  <span class="applicant-rating"><i class="fas fa-star"></i> 5.0</span>
+                </div>
+                <div class="applicant-applied-for">Applied for: Weekend Care for Max &amp; Charlie</div>
+                <div class="applicant-stats">3 years experience &bull; 89 completed jobs &bull; Verified ID</div>
+                <div class="applicant-message">"I'm a certified dog trainer and would provide excellent care for your pets."</div>
+              </div>
+            </div>
+            <div class="application-actions">
+              <button class="btn btn-success btn-sm"><i class="fas fa-check"></i> Accept</button>
+              <button class="btn btn-danger btn-sm"><i class="fas fa-times"></i> Reject</button>
+            </div>
+          </div>
+
+          <!-- Applicant 3 -->
+          <div class="application-row">
+            <div class="application-row-left">
+              <img class="applicant-avatar" src="" alt="David Chen">
+              <div>
+                <div class="applicant-name-row">
+                  <span class="applicant-name">David Chen</span>
+                  <span class="applicant-rating"><i class="fas fa-star"></i> 4.8</span>
+                </div>
+                <div class="applicant-applied-for">Applied for: Daily Walks for Luna</div>
+                <div class="applicant-stats">2 years experience &bull; 56 completed jobs &bull; Verified ID</div>
+                <div class="applicant-message">"I love cats and have experience with daily care routines."</div>
+              </div>
+            </div>
+            <div class="application-actions">
+              <button class="btn btn-success btn-sm"><i class="fas fa-check"></i> Accept</button>
+              <button class="btn btn-danger btn-sm"><i class="fas fa-times"></i> Reject</button>
+            </div>
+          </div>
+
+          <!-- Applicant 4 -->
+          <div class="application-row">
+            <div class="application-row-left">
+              <img class="applicant-avatar" src="" alt="Jessica Martinez">
+              <div>
+                <div class="applicant-name-row">
+                  <span class="applicant-name">Jessica Martinez</span>
+                  <span class="applicant-rating"><i class="fas fa-star"></i> 4.7</span>
+                </div>
+                <div class="applicant-applied-for">Applied for: Daily Walks for Luna</div>
+                <div class="applicant-stats">4 years experience &bull; 103 completed jobs &bull; Verified ID</div>
+                <div class="applicant-message">"I have two cats of my own and understand their needs perfectly."</div>
+              </div>
+            </div>
+            <div class="application-actions">
+              <button class="btn btn-success btn-sm"><i class="fas fa-check"></i> Accept</button>
+              <button class="btn btn-danger btn-sm"><i class="fas fa-times"></i> Reject</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <footer>
+    <div class="footer-container">
+      <div class="footer-col brand-col">
+        <h2><i class="fas fa-paw"></i> Petsitter's Market</h2>
+        <p>Connecting pet owners with trusted caregivers since 2020.</p>
+      </div>
+      <div class="footer-col">
+        <h3>Services</h3>
+        <a href="#">Pet Sitting</a>
+        <a href="#">Dog Walking</a>
+        <a href="#">Pet Grooming</a>
+        <a href="#">Vet Visits</a>
+      </div>
+      <div class="footer-col">
+        <h3>Company</h3>
+        <a href="#">About Us</a>
+        <a href="#">Contact</a>
+        <a href="#">Careers</a>
+        <a href="#">Privacy Policy</a>
+      </div>
+      <div class="footer-col">
+        <h3>Contact</h3>
+        <div class="contact-item"><i class="fas fa-phone-alt"></i> (555) 123-4567</div>
+        <div class="contact-item"><i class="fas fa-envelope"></i> hello@petsittersmarket.com</div>
+        <div class="social-icons">
+          <a href="#"><i class="fab fa-facebook-f"></i></a>
+          <a href="#"><i class="fab fa-instagram"></i></a>
+          <a href="#"><i class="fab fa-twitter"></i></a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">&copy; 2026 Petsitter's Market. All rights reserved.</div>
+  </footer>
+
+</body>
+</html>
