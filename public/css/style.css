@@ -68,6 +68,8 @@ nav a {
     border-radius: 8px;
 }
 
+/* content for the login and create account pages */
+
 .middle, .middle-content {
     display: flex;
     flex-direction: column;
