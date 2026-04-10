@@ -174,7 +174,44 @@ footer {
 
 /* content for the login and create account pages */
 
-.middle, .middle-content {
+.middle {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+}
+
+body.petsitter-page .middle{
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+
+}
+
+.bottom {
+    display: flex;
+    justify-content: center;
+    padding: 1rem;
+}
+
+/*can use but need addaptability for the width*/
+/*.middle-content {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+    max-width: 420px;
+    width: min(100%, 420px);
+    padding: 2rem;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 24px;
+    background-color: #ffffff;
+    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.08);
+    margin-inline: auto;
+}*/
+
+.content {
     display: flex;
     flex-direction: column;
     align-items: stretch;
@@ -188,6 +225,7 @@ footer {
     box-shadow: 0 18px 50px rgba(0, 0, 0, 0.08);
     margin-inline: auto;
 }
+
 
 body.account-page {
     min-height: 100vh;
