@@ -1,5 +1,17 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
 
+/* CSS Variables */
+:root {
+    --btn-transition: background 0.22s ease;
+    --cta-bg: #4c5122;
+    --cta-hover: #3f4420;
+    --primary-bg: #d58337;
+    --primary-hover: #bf702f;
+    --white: #ffffff;
+    --card-border: 1px solid rgba(0, 0, 0, 0.08);
+    --card-shadow: 0 18px 50px rgba(0, 0, 0, 0.08);
+}
+
 /* General Reset */
 * {
     margin: 0;
@@ -172,7 +184,7 @@ footer {
     font-size: 0.9rem;
 }
 
-/* content for the login and create account pages */
+/* login and create account pages */
 
 .middle {
     flex: 1;
@@ -182,18 +194,20 @@ footer {
     padding: 2rem 1rem;
 }
 
-body.petsitter-page .middle{
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-
-}
-
 .bottom {
     display: flex;
     justify-content: center;
     padding: 1rem;
 }
+
+/* body.petsitter-page .middle{
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+
+} */
+
+
 
 /*can use but need addaptability for the width*/
 /*.middle-content {
@@ -226,27 +240,9 @@ body.petsitter-page .middle{
     margin-inline: auto;
 }
 
-
-body.account-page {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    background: #e7b75f;
-}
-
 .middle-content h1,
 .middle-content p {
     text-align: center;
-}
-
-.middle-content h1 {
-    color: #703d15;
-    margin-bottom: 0.25rem;
-}
-
-.middle-content p {
-    color: #7a5b3e;
-    margin-bottom: 1.5rem;
 }
 
 .small-label {
@@ -262,6 +258,8 @@ body.account-page {
     margin-bottom: 1.5rem;
 }
 
+
+/* css button */ /* addapt for other colours and hover effect */
 .user-type-button {
     display: flex;
     flex-direction: column;
@@ -337,20 +335,37 @@ body.account-page {
     accent-color: #5c6125;
 }
 
+.cta-button,
+body.petsitter-page .primary-btn {
+    border: none;
+    cursor: pointer;
+    transition: var(--btn-transition);
+}
+
 .cta-button {
     width: 100%;
-    border: none;
     border-radius: 14px;
     padding: 1rem 0;
-    background: #4c5122;
-    color: #fff;
+    background: var(--cta-bg);
+    color: var(--white);
     font-weight: bold;
-    cursor: pointer;
-    transition: background 0.22s ease;
 }
 
 .cta-button:hover {
-    background: #3f4420;
+    background: var(--cta-hover);
+}
+
+body.petsitter-page .primary-btn {
+    width: fit-content;
+    padding: 1rem 1.8rem;
+    border-radius: 16px;
+    background: var(--primary-bg);
+    color: var(--white);
+    font-weight: 700;
+}
+
+body.petsitter-page .primary-btn:hover {
+    background: var(--primary-hover);
 }
 
 .auth-form {
@@ -445,12 +460,26 @@ body.account-page {
     }
 }
 
+
+/* Petsitter page */
 body.petsitter-page .middle {
     width: min(1180px, 100%);
     margin-inline: auto;
     display: flex;
     flex-direction: column;
     gap: 2rem;
+    min-height: 100vh;
+}
+
+body.petsitter-page .top .content,
+body.petsitter-page .bottom .left .content,
+body.petsitter-page .bottom .right .content {
+    width: 100%;
+    max-width: none;
+    background: #ffffff;
+    border-radius: 16px;
+    border: var(--card-border);
+    box-shadow: var(--card-shadow);
 }
 
 body.petsitter-page .top .content {
@@ -459,11 +488,11 @@ body.petsitter-page .top .content {
     align-items: center;
     gap: 1.75rem;
     padding: 2rem;
-    width: 100%;
-    max-width: none;
-    border-radius: 28px;
-    background: #ffffff;
-    box-shadow: 0 28px 60px rgba(0, 0, 0, 0.1);
+}
+
+body.petsitter-page .bottom.left .content,
+body.petsitter-page .bottom .right .content {
+    padding: 1.75rem;
 }
 
 body.petsitter-page .top .image {
@@ -472,7 +501,6 @@ body.petsitter-page .top .image {
     border-radius: 50%;
     background: linear-gradient(135deg, #f8e2c1, #dfb176);
     border: 10px solid #ffffff;
-    box-shadow: 0 18px 38px rgba(0, 0, 0, 0.14);
 }
 
 body.petsitter-page .info {
@@ -527,22 +555,6 @@ body.petsitter-page .badges span {
     font-weight: 600;
 }
 
-body.petsitter-page .primary-btn {
-    width: fit-content;
-    padding: 1rem 1.8rem;
-    border: none;
-    border-radius: 16px;
-    background: #d58337;
-    color: #ffffff;
-    font-weight: 700;
-    cursor: pointer;
-    box-shadow: 0 16px 30px rgba(213, 131, 55, 0.26);
-}
-
-body.petsitter-page .primary-btn:hover {
-    background: #bf702f;
-}
-
 body.petsitter-page .bottom {
     display: grid;
     grid-template-columns: minmax(0, 2.2fr) minmax(300px, 1fr);
@@ -554,16 +566,6 @@ body.petsitter-page .bottom .right {
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
-}
-
-body.petsitter-page .bottom .left .content,
-body.petsitter-page .bottom .right .content {
-    width: 100%;
-    max-width: none;
-    padding: 1.75rem;
-    background: #ffffff;
-    border-radius: 24px;
-    box-shadow: 0 18px 45px rgba(0, 0, 0, 0.08);
 }
 
 body.petsitter-page .content h2 {
@@ -588,14 +590,22 @@ body.petsitter-page .review {
     border-radius: 20px;
 }
 
-body.petsitter-page .review h4 {
+body.petsitter-page .review h4,
+body.petsitter-page .experience-item h4 {
     margin: 0;
-    color: #6e4a34;
     font-size: 1rem;
 }
 
-body.petsitter-page .review p {
+body.petsitter-page .review h4 {
+    color: #6e4a34;
+}
+
+body.petsitter-page .review p,
+body.petsitter-page .experience-item p {
     margin: 0;
+}
+
+body.petsitter-page .review p {
     color: #755c49;
     font-size: 0.96rem;
 }
@@ -623,8 +633,6 @@ body.petsitter-page .experience-item {
     grid-template-columns: auto 1fr;
     gap: 1rem;
     padding: 1rem;
-    border-radius: 18px;
-    background: #f9f1e3;
     align-items: center;
 }
 
@@ -702,48 +710,41 @@ body.petsitter-page .availability-list li.booked span {
 }
 
 /* Calendar styles */
-body.petsitter-page .calendar {
+.calendar {
     margin-top: 1rem;
 }
 
-body.petsitter-page .calendar h3 {
+.calendar h3 {
     margin-bottom: 1rem;
     color: #5d4330;
     font-weight: 600;
 }
 
-body.petsitter-page .calendar table {
+.calendar table {
     width: 100%;
     border-collapse: collapse;
-    background-color: #ffffff;
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-body.petsitter-page .calendar th,
-body.petsitter-page .calendar td {
+.calendar th,
+.calendar td {
     padding: 0.5rem;
     text-align: center;
     border: 1px solid #e5e7eb;
 }
 
-body.petsitter-page .calendar th {
+.calendar th {
     background-color: #f9f9f9;
     font-weight: 600;
-    color: #772f1a;
 }
 
-body.petsitter-page .calendar td.available {
+.calendar td.available {
     background-color: #d4edda;
-    color: #155724;
 }
 
-body.petsitter-page .calendar td.booked {
+.calendar td.booked {
     background-color: #f8d7da;
-    color: #721c24;
 }
 
-body.petsitter-page .calendar td.empty {
+.calendar td.empty {
     background-color: #f8f9fa;
 }
