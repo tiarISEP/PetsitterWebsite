@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- SEO de base obligatoire -->
-    <title>Create Account | Petsitter's Market</title>
+    <title>Sign up | Petsitter's Market</title>
     <meta name="description" content="Create your Petsitter's Market account to connect with trusted sitters and pet owners.">
     
     <!-- CSS & Favicon -->
@@ -33,57 +33,62 @@
 
     <!-- id="main-content" requis pour le lien d'évitement ci-dessus -->
     <main id="main-content">
-        <section>
-            <div class="middle-content">
-                <h1>Create Your Account</h1>
-                <p>Join our community of pet lovers</p>
+        <div class="content">
+            <h1>Create Your Account</h1>
+            <p>Join our community of pet lovers</p>
 
-                <form class="auth-form" action="#" method="post">
-                    <p class="small-label">I am a:</p>
-                    <div class="user-type-row">
-                        <button class="user-type-button selected" type="button" data-type="pet-owner">
-                            <span>❤</span>
-                            <strong>Pet Owner</strong>
-                            <small>Find trusted sitters</small>
-                        </button>
-                        <button class="user-type-button" type="button" data-type="pet-sitter">
-                            <span>🤝</span>
-                            <strong>Pet Sitter</strong>
-                            <small>Earn caring for pets</small>
-                        </button>
-                    </div>
+            <form class="auth-form" action="#" method="post">
+                <p class="small-label">I am a:</p>
+                <div class="user-type-row">
+                    <button class="user-type-button" type="button" data-type="pet-owner">
+                        <span>❤</span>
+                        <strong>Pet Owner</strong>
+                        <small>Find trusted sitters</small>
+                    </button>
+                    <button class="user-type-button" type="button" data-type="pet-sitter">
+                        <span>🤝</span>
+                        <strong>Pet Sitter</strong>
+                        <small>Earn caring for pets</small>
+                    </button>
+                </div>
 
-                    <loginBox>
-                        <h2>Username</h2>
-                        <input type="text" name="username" placeholder="Choose a username" size="49"/>
-                    </loginBox>
+                <loginBox>
+                    <h2>Username</h2>
+                    <input type="text" name="username" placeholder="Choose a username" size="49"/>
+                </loginBox>
 
-                    <loginBox>
-                        <h2>Email Address</h2>
-                        <input type="email" name="email" placeholder="Enter your email" size="49"/>
-                    </loginBox>
+                <loginBox>
+                    <h2>Email Address</h2>
+                    <input type="email" name="email" placeholder="Enter your email" size="49"/>
+                </loginBox>
 
-                    <loginBox>
-                        <h2>Password</h2>
-                        <input type="password" name="password" placeholder="Create a password" size="49"/>
-                    </loginBox>
+                <loginBox>
+                    <h2>Password</h2>
+                    <input type="password" name="password" placeholder="Create a password" size="49"/>
+                </loginBox>
 
-                    <loginBox>
-                        <h2>Confirm Password</h2>
-                        <input type="password" name="confirm_password" placeholder="Confirm your password" size="49"/>
-                    </loginBox>
+                <loginBox>
+                    <h2>Confirm Password</h2>
+                    <input type="password" name="confirm_password" placeholder="Confirm your password" size="49"/>
+                </loginBox>
 
-                    <div class="check-box">
-                        <input type="checkbox" name="terms-conditions" id="terms-conditions" />
-                        <label for="terms-conditions">I agree to the Terms of Service and Privacy Policy</label>
-                    </div>
+                <div class="check-box">
+                    <input type="checkbox" name="terms-conditions" id="terms-conditions" />
+                    <label for="terms-conditions">I agree to the Terms of Service and Privacy Policy</label>
+                </div>
 
-                    <input type="submit" value="Create Account" class="cta-button" />
-                </form>
+                <input type="submit" value="Create Account" class="cta-button" />
+            </form>
 
-                <p class="signin-copy">Already have an account? <a href="login.html">Sign in</a></p>
+            <div class="divider">Sign-up from other platforms</div>
+
+            <div class="social-row">
+                <button type="button" class="social-button google-login">Google</button>
+                <button type="button" class="social-button facebook-login">Facebook</button>
             </div>
-        </section>
+
+            <p class="signin-copy">Already have an account? <a href="login.html">Sign in</a></p>
+        </div>
     </main>
 
     <footer>

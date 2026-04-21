@@ -174,7 +174,44 @@ footer {
 
 /* content for the login and create account pages */
 
-.middle, .middle-content {
+.middle {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+}
+
+body.petsitter-page .middle{
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+
+}
+
+.bottom {
+    display: flex;
+    justify-content: center;
+    padding: 1rem;
+}
+
+/*can use but need addaptability for the width*/
+/*.middle-content {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+    max-width: 420px;
+    width: min(100%, 420px);
+    padding: 2rem;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 24px;
+    background-color: #ffffff;
+    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.08);
+    margin-inline: auto;
+}*/
+
+.content {
     display: flex;
     flex-direction: column;
     align-items: stretch;
@@ -188,6 +225,7 @@ footer {
     box-shadow: 0 18px 50px rgba(0, 0, 0, 0.08);
     margin-inline: auto;
 }
+
 
 body.account-page {
     min-height: 100vh;
@@ -405,4 +443,307 @@ body.account-page {
     .user-type-row {
         grid-template-columns: 1fr;
     }
+}
+
+body.petsitter-page .middle {
+    width: min(1180px, 100%);
+    margin-inline: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+body.petsitter-page .top .content {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1.75rem;
+    padding: 2rem;
+    width: 100%;
+    max-width: none;
+    border-radius: 28px;
+    background: #ffffff;
+    box-shadow: 0 28px 60px rgba(0, 0, 0, 0.1);
+}
+
+body.petsitter-page .top .image {
+    width: 180px;
+    aspect-ratio: 1 / 1;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #f8e2c1, #dfb176);
+    border: 10px solid #ffffff;
+    box-shadow: 0 18px 38px rgba(0, 0, 0, 0.14);
+}
+
+body.petsitter-page .info {
+    flex: 1;
+    min-width: 280px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+}
+
+body.petsitter-page .info .name {
+    font-size: clamp(2rem, 2.5vw, 2.4rem);
+    color: #7c321f;
+    font-weight: 700;
+}
+
+body.petsitter-page .info .subtitle {
+    color: #8a6d53;
+    font-size: 1rem;
+}
+
+body.petsitter-page .rating-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+    color: #d48a39;
+    font-weight: 600;
+}
+
+body.petsitter-page .rating-row .stars {
+    letter-spacing: 0.08em;
+}
+
+body.petsitter-page .rating-row .score,
+body.petsitter-page .rating-row .reviews {
+    color: #6d4330;
+}
+
+body.petsitter-page .badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.7rem;
+    margin: 1rem 0 0;
+}
+
+body.petsitter-page .badges span {
+    padding: 0.75rem 1rem;
+    border-radius: 14px;
+    background: #f3c570;
+    color: #6b4327;
+    font-weight: 600;
+}
+
+body.petsitter-page .primary-btn {
+    width: fit-content;
+    padding: 1rem 1.8rem;
+    border: none;
+    border-radius: 16px;
+    background: #d58337;
+    color: #ffffff;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 16px 30px rgba(213, 131, 55, 0.26);
+}
+
+body.petsitter-page .primary-btn:hover {
+    background: #bf702f;
+}
+
+body.petsitter-page .bottom {
+    display: grid;
+    grid-template-columns: minmax(0, 2.2fr) minmax(300px, 1fr);
+    gap: 1.75rem;
+}
+
+body.petsitter-page .bottom .left,
+body.petsitter-page .bottom .right {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+body.petsitter-page .bottom .left .content,
+body.petsitter-page .bottom .right .content {
+    width: 100%;
+    max-width: none;
+    padding: 1.75rem;
+    background: #ffffff;
+    border-radius: 24px;
+    box-shadow: 0 18px 45px rgba(0, 0, 0, 0.08);
+}
+
+body.petsitter-page .content h2 {
+    margin-bottom: 1rem;
+    color: #7c321f;
+    font-size: 1.35rem;
+}
+
+body.petsitter-page .content p {
+    margin: 0;
+    color: #5f4a39;
+    line-height: 1.75;
+    font-size: 0.98rem;
+}
+
+body.petsitter-page .review {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    padding: 1.25rem;
+    background: #fff6ed;
+    border-radius: 20px;
+}
+
+body.petsitter-page .review h4 {
+    margin: 0;
+    color: #6e4a34;
+    font-size: 1rem;
+}
+
+body.petsitter-page .review p {
+    margin: 0;
+    color: #755c49;
+    font-size: 0.96rem;
+}
+
+body.petsitter-page .review::before {
+    content: '★★★★★ 5.0';
+    display: block;
+    margin-bottom: 0.7rem;
+    color: #d48a39;
+    letter-spacing: 0.05em;
+}
+
+body.petsitter-page .content a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    color: #d48a39;
+    text-decoration: none;
+    font-weight: 700;
+    margin-top: 1rem;
+}
+
+body.petsitter-page .experience-item {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 1rem;
+    padding: 1rem;
+    border-radius: 18px;
+    background: #f9f1e3;
+    align-items: center;
+}
+
+body.petsitter-page .experience-item i {
+    font-size: 1.25rem;
+    color: #d48a39;
+}
+
+body.petsitter-page .experience-item h4 {
+    margin: 0;
+    color: #6b4230;
+    font-size: 1rem;
+}
+
+body.petsitter-page .experience-item p {
+    margin: 0;
+    color: #846144;
+    font-size: 0.95rem;
+}
+
+body.petsitter-page .services-list,
+body.petsitter-page .availability-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.85rem;
+}
+
+body.petsitter-page .services-list li,
+body.petsitter-page .availability-list li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    color: #5d4330;
+    font-weight: 600;
+}
+
+body.petsitter-page .services-list li::before {
+    content: '✔';
+    color: #3f8a4b;
+}
+
+body.petsitter-page .availability-list li span {
+    color: #2d7b34;
+    font-weight: 700;
+}
+
+body.petsitter-page .availability-list li.booked span {
+    color: #c4423f;
+}
+
+@media (max-width: 980px) {
+    body.petsitter-page .top .content {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    body.petsitter-page .bottom {
+        grid-template-columns: 1fr;
+    }
+    body.petsitter-page .primary-btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 640px) {
+    body.petsitter-page main {
+        padding: 2rem 0 3rem;
+    }
+    body.petsitter-page .top .image {
+        width: 150px;
+    }
+}
+
+/* Calendar styles */
+body.petsitter-page .calendar {
+    margin-top: 1rem;
+}
+
+body.petsitter-page .calendar h3 {
+    margin-bottom: 1rem;
+    color: #5d4330;
+    font-weight: 600;
+}
+
+body.petsitter-page .calendar table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #ffffff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+body.petsitter-page .calendar th,
+body.petsitter-page .calendar td {
+    padding: 0.5rem;
+    text-align: center;
+    border: 1px solid #e5e7eb;
+}
+
+body.petsitter-page .calendar th {
+    background-color: #f9f9f9;
+    font-weight: 600;
+    color: #772f1a;
+}
+
+body.petsitter-page .calendar td.available {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+body.petsitter-page .calendar td.booked {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+body.petsitter-page .calendar td.empty {
+    background-color: #f8f9fa;
 }
