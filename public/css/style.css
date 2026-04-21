@@ -224,6 +224,13 @@ body.account-page {
     margin-bottom: 1.5rem;
 }
 
+.service-type-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.9rem;
+    margin-bottom: 1.5rem;
+}
+
 .user-type-button {
     display: flex;
     flex-direction: column;

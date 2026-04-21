@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- SEO de base obligatoire -->
-    <title>Ad Details | PetSitter's Market</title>
+    <title>Post Ad | PetSitter's Market</title>
     <meta name="description" content="Description courte et incisive de la page (environ 155 caractères), vitale pour le SEO.">
     
     <!-- CSS & Favicon -->
@@ -13,32 +13,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <!-- <link rel="icon" href="/favicon.ico" type="image/x-icon"> -->
 </head>
-<style>
-    .whitebox {
-        border-radius: 20px;
-        background-color: white;
-        margin: 20px;
-        padding: 20px;
-        box-shadow: 5px 10px 15px rgba(0, 0, 0, 0.3);
-    }
-    .orangebox{  
-        border-radius: 20px;
-        color: white;
-        background-color: rgb(255, 179, 0);
-
-        margin: 20px;
-        padding: 20px;
-        box-shadow: 5px 10px 15px rgba(0, 0, 0, 0.3);}
-    .orangebox:hover{
-        position: relative;
-        top: 7px;
-        border-radius: 20px;
-        color: rgb(180, 180, 180);
-        background-color: rgb(139, 98, 0);
-        margin: 20px;
-        padding: 20px;
-        box-shadow: 5px 10px 15px rgba(0, 0, 0, 0.3);}
-</style>
 <body>
     <!-- Accessibilité : Lien d'évitement -->
     <a href="#main-content" class="skip-link" style="position: absolute; left: -9999px;">Aller au contenu principal</a>
@@ -63,37 +37,58 @@
             </ul>
         </nav>
     </header>
-
+    <h1 style="text-align: center;">Post a Pet Care Ad</h1> 
+    <br>
+    <p style="text-align: center;">Find the perfect sitter for your beloved pet </p>
     <!-- id="main-content" requis pour le lien d'évitement ci-dessus -->
     <main id="main-content">
-        <!-- 
-            =================================================
-            CONTENU SPÉCIFIQUE À LA PAGE (À INSERER ICI)
-            ================================================= 
-        -->
-
-        <div id = "left side" style ="width:10%;display:inline-block"></div>
-        <div id = "middle" style ="width:80%;display:inline-block">
-            <div ip="topper part"><h1>Ad details</h1> </div>
-            <div id = "top part">
-                <div id="pictures" class="whitebox" style ="width:45%;display:inline-block"> Pictures <img width="400" height="300" src="https://upload.wikimedia.org/wikipedia/commons/9/99/Brooks_Chase_Ranger_of_Jolly_Dogs_Jack_Russell.jpg" alt="dog"></div>
-                <div id="main information"  style ="width:45%;display:inline-block">
-                    <div id = "animal" class="whitebox">NAME OF ANIMAL <br>
-                     Type of animal, Age of animal
-                    </div> 
-                    <div id = "mission details" class="whitebox">Mission Details</div> 
-                    <div id = "pet owner" class="whitebox">Pet owner</div>
-                    <div id = "apply now" class="orangebox"> <b>Apply now ==></b></div>
+        
+        <section>
+            <div class="middle-content">
+                <div id="number-one">
+                <h2>1. Select your pet</h2>
+                <span>Choose from your registered pets</span> <br>
+                <select name="pets" id="pets" aria-placeholder="Select a pet...">
+                    <option value="1">Rufus</option>
+                    <option value="2">Mistigri</option>
+                    <option value="3">Pollux</option>
+                    <option value="4">Martin</option>
+                </select>
                 </div>
+                <div id="number-two">
+                <h2>2. Service Details</h2>
+                <label> Start and End Dates</label>
+                <div> <input type="date" id="startdate" style="width: 49%; display: inline-block;"> 
+                <input type="date" id="enddate" style="width: 49%;display: inline-block;"></div>
+                <label>Address</label> <br>
+                <input type="text" id="address" value="Adress">
+                <p class="small-label">Type of service:</p>
+                    <div class="service-type-row">
+                        <button class="user-type-button" type="button" data-type="dog-walking">
+                            <span>🚶</span>
+                            <strong>Dog Walking</strong>
+                        </button>
+                        <button class="user-type-button" type="button" data-type="pet-sitting">
+                            <span>🏠</span>
+                            <strong>Pet Sitting</strong>
+                        </button>
+                        <button class="user-type-button" type="button" data-type="pet-boarding">
+                            <span>🛏️</span>
+                            <strong>Pet Boarding</strong>
+                        </button>  
+                    </div>
+                </div>
+                <textarea name="AddInfo" rows="4" id="addinfo">Describe any additional requirements, instructions or information about your pet...</textarea>
+                <div id="number-three">
+                <h2>3. Set your budget</h2>
+                <label>Payment offer and type</label>
+                <div> 
+                <input type="number" style="width: 49%;"> <select name="paytype" id="paytype" style="width: 49%;"><option value="1">Card</option> <option value="2">Cash</option></select>
+                </div>
+                </div>
+                <button class="cta-button">Post My Ad</button>
             </div>
-            <div id = "bottom part">
-                <div id = "about" style="width:20%;display:inline-block" class="whitebox">About Pierre</div>
-                <div id = "requirements" style="width:20%;display:inline-block" class="whitebox">Requirements</div>
-                <div id = "included" style="width:20%;display:inline-block" class="whitebox">Included</div>
-            </div>
-        </div>
-        <div id = "right side" style ="width:10%;display:inline-block"></div>
-  
+        </section>
     </main>
 
     <footer>
