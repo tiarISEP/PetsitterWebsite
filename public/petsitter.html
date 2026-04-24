@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en"> 
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- SEO de base obligatoire -->
+    <title>Petsitter profile | PetSitter's Market</title>
+    <meta name="description" content="Description courte et incisive de la page (environ 155 caractères), vitale pour le SEO.">
+    -->
+    <!-- CSS & Favicon -->
+    <!-- Utilise des chemins relatifs absolus par rapport à la racine si tu as des sous-dossiers -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- <link rel="icon" href="/favicon.ico" type="image/x-icon"> -->
+</head>
+<body class="petsitter-page">
+    <!-- Accessibilité : Lien d'évitement -->
+    <a href="#main-content" class="skip-link" style="position: absolute; left: -9999px;">Aller au contenu principal</a>
+
+    <header>
+        <div class="logo">
+            <!-- Le logo doit TOUJOURS ramener à l'accueil -->
+            <a href="index.html" style="text-decoration: none; color: inherit;">PetSitter's Market</a> 
+        </div>
+        <nav aria-label="Navigation principale">
+            <ul>
+                <!-- Utilise de vrais chemins pour le multi-pages -->
+                <li><a href="index.html">Home</a></li>
+                <li><a href="services.html">Services</a></li>
+                <li><a href="contact.html">Contact</a></li>
+                <li>
+                    <a href="login.html" style="font-weight: 500; color: #772f1a; padding: 0.5rem 1rem;">Login</a>
+                </li>
+                <li>
+                    <a href="signup.html" style="background-color: #585123; color: white; padding: 0.5rem 1.5rem; border-radius: 8px; font-weight: 500; text-decoration: none;">Sign Up</a>
+                </li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- id="main-content" requis pour le lien d'évitement ci-dessus -->
+    <main id="main-content">
+
+        <div class="middle">
+            <div class="top">
+                <div class="content">
+                    <div class="image"></div>
+                    <div class="info">
+                        <p class="name">Sarah Johnson<!--{user.name}--></p>
+                        <p class="subtitle">Professional Pet Sitter <!--user.qualifications}--> • 5 years experience<!--{user.experience}--></p>
+                        <div class="rating-row">
+                            <span class="stars">★★★★★<!--make a simple prog to calculate stars to display--></span>
+                            <span class="score">5.0<!--{user.rating}--></span>
+                            <span class="reviews">(127 reviews)<!--{user.review_count}--></span>
+                        </div>
+                        <div class="badges">
+                            <span>$25/hour<!--{user.hourly_rate}--></span>
+                            <span>Available<!--{user.available}--></span>
+                            <span>2 miles away<!--{user.distance}--><!--calculate an estimate of distance in km--></span>
+                        </div>
+                        <button class="primary-btn">Send Message<!--redirect to the messagae page--></button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bottom">
+                <div class="left">
+                    <div class="content">
+                        <h2>About Me</h2>
+                        <p>Hi there! I'm Sarah, a passionate pet lover with over 5 years of professional pet sitting experience. I understand that your furry family members deserve the best care while you're away, and I'm here to provide exactly that.</p>
+                        <p>I offer personalized care for each pet, maintaining their routine and providing lots of love and attention. Whether it's daily walks, feeding schedules, or just companionship, I treat every pet as if they were my own.</p>
+                        <p>I'm available for both short-term and long-term sitting arrangements, and I always provide regular updates with photos so you can have peace of mind while you're away.</p>
+                    </div>
+                    <div class="content">
+                        <h2>Reviews (127)</h2>
+                        <div class="review">
+                            <h4>Mike Chen</h4>
+                            <p>“Sarah was amazing with our Golden Retriever, Max! She sent daily updates with photos and videos, and Max was so happy when we returned. Highly recommend!”</p>
+                        </div>
+                        <div class="review">
+                            <h4>Emma Wilson</h4>
+                            <p>“Perfect pet sitter! Sarah took excellent care of our two cats while we were on vacation. Very reliable and trustworthy. Will definitely book again!”</p>
+                        </div>
+                        <div class="review">
+                            <h4>David Park</h4>
+                            <p>“Sarah is wonderful! She took great care of our rescue dog who can be anxious with new people. Her patience and experience really showed. Thank you Sarah!”</p>
+                        </div>
+                        <a href="#reviews">View all reviews →</a>
+                    </div>
+                </div>
+
+                <div class="right">
+                    <div class="content">
+                        <h2>Experience</h2>
+                        <div class="experience-item"><i class="fas fa-dog"></i><div><h4>Dogs</h4><p>5+ years experience</p></div></div>
+                        <div class="experience-item"><i class="fas fa-cat"></i><div><h4>Cats</h4><p>4+ years experience</p></div></div>
+                        <div class="experience-item"><i class="fas fa-dove"></i><div><h4>Birds</h4><p>2+ years experience</p></div></div>
+                        <div class="experience-item"><i class="fas fa-fish"></i><div><h4>Small Animals</h4><p>3+ years experience</p></div></div>
+                    </div>
+                    <div class="content">
+                        <h2>Services Offered</h2>
+                        <ul class="services-list">
+                            <li>Pet Sitting</li>
+                            <li>Dog Walking</li>
+                            <li>Overnight Care</li>
+                            <li>Pet Transportation</li>
+                            <li>Basic Grooming</li>
+                        </ul>
+                    </div>
+                    <div class="content">
+                        <h2>Availability</h2>
+                        <div class="calendar">
+                            <h3>April 2026</h3>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Sun</th>
+                                        <th>Mon</th>
+                                        <th>Tue</th>
+                                        <th>Wed</th>
+                                        <th>Thu</th>
+                                        <th>Fri</th>
+                                        <th>Sat</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="empty"></td>
+                                        <td class="empty"></td>
+                                        <td class="empty"></td>
+                                        <td class="empty"></td>
+                                        <td class="available">1</td>
+                                        <td class="available">2</td>
+                                        <td class="available">3</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="available">4</td>
+                                        <td class="available">5</td>
+                                        <td class="available">6</td>
+                                        <td class="booked">7</td>
+                                        <td class="available">8</td>
+                                        <td class="available">9</td>
+                                        <td class="available">10</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="available">11</td>
+                                        <td class="available">12</td>
+                                        <td class="available">13</td>
+                                        <td class="booked">14</td>
+                                        <td class="available">15</td>
+                                        <td class="available">16</td>
+                                        <td class="available">17</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="available">18</td>
+                                        <td class="available">19</td>
+                                        <td class="available">20</td>
+                                        <td class="booked">21</td>
+                                        <td class="available">22</td>
+                                        <td class="available">23</td>
+                                        <td class="available">24</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="available">25</td>
+                                        <td class="available">26</td>
+                                        <td class="available">27</td>
+                                        <td class="booked">28</td>
+                                        <td class="available">29</td>
+                                        <td class="available">30</td>
+                                        <td class="empty"></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+    </main>
+
+    <footer>
+        <div class="footer-container">
+            <div class="footer-col brand-col">
+                <h2><i class="fas fa-paw"></i> Petsitter's Market</h2>
+                <p>Connecting pet owners with<br>trusted caregivers since 2020.</p>
+            </div>
+            
+            <div class="footer-col">
+                <h3>Services</h3>
+                <a href="#">Pet Sitting</a>
+                <a href="#">Dog Walking</a>
+                <a href="#">Pet Grooming</a>
+                <a href="#">Vet Visits</a>
+            </div>
+
+            <div class="footer-col">
+                <h3>Company</h3>
+                <a href="#">About Us</a>
+                <a href="#">Contact</a>
+                <a href="#">Careers</a>
+                <a href="#">Privacy Policy</a>
+            </div>
+
+            <div class="footer-col">
+                <h3>Contact</h3>
+                <div class="contact-item">
+                    <i class="fas fa-phone-alt"></i> (555) 123-4567
+                </div>
+                <div class="contact-item">
+                    <i class="fas fa-envelope"></i> hello@petsittersmarket.com
+                </div>
+                <div class="social-icons">
+                    <a href="#"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            &copy; 2026 Petsitter's Market. All rights reserved.
+        </div>
+    </footer>
+</body>
+</html>
