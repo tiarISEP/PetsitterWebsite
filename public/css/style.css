@@ -186,6 +186,7 @@ footer {
 
 /* login and create account pages */
 
+<<<<<<< HEAD
 .middle {
     flex: 1;
     display: flex;
@@ -226,6 +227,9 @@ footer {
 }*/
 
 .content {
+=======
+.middle, .middle-content {
+>>>>>>> main
     display: flex;
     flex-direction: column;
     align-items: stretch;
@@ -240,6 +244,16 @@ footer {
     margin-inline: auto;
 }
 
+<<<<<<< HEAD
+=======
+body.account-page {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: #e7b75f;
+}
+
+>>>>>>> main
 .middle-content h1,
 .middle-content p {
     text-align: center;
@@ -258,8 +272,18 @@ footer {
     margin-bottom: 1.5rem;
 }
 
+<<<<<<< HEAD
 
 /* css button */ /* addapt for other colours and hover effect */
+=======
+.service-type-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.9rem;
+    margin-bottom: 1.5rem;
+}
+
+>>>>>>> main
 .user-type-button {
     display: flex;
     flex-direction: column;
@@ -459,6 +483,7 @@ body.petsitter-page .primary-btn:hover {
         grid-template-columns: 1fr;
     }
 }
+<<<<<<< HEAD
 
 
 /* Petsitter page */
@@ -748,3 +773,5 @@ body.petsitter-page .availability-list li.booked span {
 .calendar td.empty {
     background-color: #f8f9fa;
 }
+=======
+>>>>>>> main
