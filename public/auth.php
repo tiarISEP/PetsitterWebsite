@@ -1,14 +1,23 @@
 <?php
-// Authentication helper functions
+// public/auth.php
 
+/**
+ * Nettoie les entrées utilisateur pour éviter les failles XSS
+ */
 function sanitizeInput($input) {
     return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
 }
 
+/**
+ * Vérifie si l'utilisateur possède une session active
+ */
 function isUserLoggedIn() {
     return isset($_SESSION['user_id']) && isset($_SESSION['username']);
 }
 
+/**
+ * Redirige les utilisateurs non connectés vers la page de login
+ */
 function redirectToLogin() {
     if (!isUserLoggedIn()) {
         header("Location: login.php");
@@ -16,21 +25,29 @@ function redirectToLogin() {
     }
 }
 
+/**
+ * Détruit la session et redirige vers l'accueil PHP
+ */
 function logoutUser() {
     session_destroy();
-    header("Location: index.html");
+    header("Location: index.php"); // Corrigé : index.php au lieu de .html
     exit();
 }
 
+/**
+ * Validations de format
+ */
 function validateEmail($email) {
     return filter_var($email, FILTER_VALIDATE_EMAIL);
 }
 
 function validatePassword($password) {
-    // Password must be at least 8 characters
     return strlen($password) >= 8;
 }
 
+/**
+ * Sécurité des mots de passe
+ */
 function hashPassword($password) {
     return password_hash($password, PASSWORD_BCRYPT);
 }
@@ -39,19 +56,20 @@ function verifyPassword($password, $hash) {
     return password_verify($password, $hash);
 }
 
-function getUserById($conn, $user_id) {
-    $stmt = $conn->prepare("SELECT id, username, email, user_type, created_at FROM users WHERE id = ?");
-    $stmt->bind_param("i", $user_id);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    return $result->fetch_assoc();
+/**
+ * RÉCUPÉRATION DES DONNÉES (Version PDO avec mapping role -> user_type)
+ */
+
+function getUserById($pdo, $user_id) {
+    // Utilisation de "role AS user_type" pour rester compatible avec le code de Romain
+    $stmt = $pdo->prepare("SELECT id, username, email, role AS user_type, created_at FROM users WHERE id = ?");
+    $stmt->execute([$user_id]);
+    return $stmt->fetch(); // PDO renvoie directement un tableau associatif par défaut
 }
 
-function getUserByEmail($conn, $email) {
-    $stmt = $conn->prepare("SELECT id, username, email, password, user_type FROM users WHERE email = ?");
-    $stmt->bind_param("s", $email);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    return $result->fetch_assoc();
+function getUserByEmail($pdo, $email) {
+    $stmt = $pdo->prepare("SELECT id, username, email, password, role AS user_type FROM users WHERE email = ?");
+    $stmt->execute([$email]);
+    return $stmt->fetch();
 }
 ?>
