@@ -6,7 +6,7 @@
     <!-- SEO de base obligatoire -->
     <title>Petsitter profile | PetSitter's Market</title>
     <meta name="description" content="Description courte et incisive de la page (environ 155 caractères), vitale pour le SEO.">
-    -->
+
     <!-- CSS & Favicon -->
     <!-- Utilise des chemins relatifs absolus par rapport à la racine si tu as des sous-dossiers -->
     <link rel="stylesheet" href="css/style.css">
@@ -44,7 +44,7 @@
         <div class="middle">
             <div class="top">
                 <div class="content">
-                    <div class="image"></div>
+                    <div class="image"></div> <!-- utiliser balise <img> -->
                     <div class="info">
                         <p class="name">Sarah Johnson<!--{user.name}--></p>
                         <p class="subtitle">Professional Pet Sitter <!--user.qualifications}--> • 5 years experience<!--{user.experience}--></p>
