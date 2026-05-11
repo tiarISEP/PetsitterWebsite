@@ -4,6 +4,7 @@ define('DB_HOST', 'localhost');
 define('DB_USER', 'root');
 define('DB_PASS', '');
 define('DB_NAME', 'petsitter_db');
+// adapt the db (database) to the real one
 
 // Create connection
 $conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
@@ -16,8 +17,7 @@ if ($conn->connect_error) {
 // Set charset to utf8
 $conn->set_charset("utf8");
 
-// Session configuration
-session_start();
+// Session configuration - startSecureSession() is called in each PHP file
 define('SESSION_TIMEOUT', 1800); // 30 minutes
 
 // Security headers
