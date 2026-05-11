@@ -186,7 +186,6 @@ footer {
 
 /* login and create account pages */
 
-<<<<<<< HEAD
 .middle {
     flex: 1;
     display: flex;
@@ -210,8 +209,92 @@ footer {
 
 
 
+/* new css for the php forms login and signup */
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+}
+
+.form-group label {
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: #7b5c42;
+    display: block;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 1.1rem 1.2rem;
+    border: 2px solid #e2d9cd;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #fbf8f4 0%, #faf5f0 100%);
+    color: #5d4736;
+    font-size: 0.95rem;
+    font-family: 'Poppins', Arial, sans-serif;
+    box-sizing: border-box;
+    display: block;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.form-group input::placeholder {
+    color: #c4a888;
+    font-weight: 500;
+}
+
+.form-group input:hover {
+    border-color: #d8b89a;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    background: linear-gradient(135deg, #fdfbf8 0%, #fbf8f4 100%);
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: #d58337;
+    box-shadow: 0 4px 16px rgba(213, 131, 55, 0.2);
+    background: linear-gradient(135deg, #ffffff 0%, #faf5f0 100%);
+}
+
+/* Password toggle wrapper */
+.password-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.password-wrapper input {
+    width: 100%;
+    padding-right: 3rem;
+}
+
+.password-toggle {
+    position: absolute;
+    right: 1rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #9b7e60;
+    font-size: 1.1rem;
+    padding: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.3s ease;
+}
+
+.password-toggle:hover {
+    color: #7b5c42;
+}
+
+.password-toggle:focus {
+    outline: none;
+    color: #d58337;
+}
+
+
 /*can use but need addaptability for the width*/
-/*.middle-content {
+.middle-content {
     display: flex;
     flex-direction: column;
     align-items: stretch;
@@ -224,12 +307,9 @@ footer {
     background-color: #ffffff;
     box-shadow: 0 18px 50px rgba(0, 0, 0, 0.08);
     margin-inline: auto;
-}*/
+}
 
 .content {
-=======
-.middle, .middle-content {
->>>>>>> main
     display: flex;
     flex-direction: column;
     align-items: stretch;
@@ -244,16 +324,6 @@ footer {
     margin-inline: auto;
 }
 
-<<<<<<< HEAD
-=======
-body.account-page {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    background: #e7b75f;
-}
-
->>>>>>> main
 .middle-content h1,
 .middle-content p {
     text-align: center;
@@ -272,10 +342,6 @@ body.account-page {
     margin-bottom: 1.5rem;
 }
 
-<<<<<<< HEAD
-
-/* css button */ /* addapt for other colours and hover effect */
-=======
 .service-type-row {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -283,7 +349,7 @@ body.account-page {
     margin-bottom: 1.5rem;
 }
 
->>>>>>> main
+/* css button */ /* addapt for other colours and hover effect */
 .user-type-button {
     display: flex;
     flex-direction: column;
@@ -318,6 +384,7 @@ body.account-page {
     transform: translateY(-1px);
 }
 
+/*
 .loginBox {
     display: flex;
     flex-direction: column;
@@ -332,17 +399,37 @@ body.account-page {
 
 .loginBox input {
     width: 100%;
-    padding: 0.95rem 1rem;
-    border: 1px solid #e2d9cd;
-    border-radius: 14px;
-    background: #fbf8f4;
+    padding: 1.1rem 1.2rem;
+    border: 2px solid #e2d9cd;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #fbf8f4 0%, #faf5f0 100%);
     color: #5d4736;
     font-size: 0.95rem;
+    font-family: 'Poppins', Arial, sans-serif;
+    box-sizing: border-box;
+    display: block;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .loginBox input::placeholder {
-    color: #b89e80;
+    color: #c4a888;
+    font-weight: 500;
 }
+
+.loginBox input:hover {
+    border-color: #d8b89a;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    background: linear-gradient(135deg, #fdfbf8 0%, #fbf8f4 100%);
+}
+
+.loginBox input:focus {
+    outline: none;
+    border-color: #d58337;
+    box-shadow: 0 4px 16px rgba(213, 131, 55, 0.2);
+    background: linear-gradient(135deg, #ffffff 0%, #faf5f0 100%);
+}
+*/
 
 .check-box {
     display: flex;
@@ -483,7 +570,6 @@ body.petsitter-page .primary-btn:hover {
         grid-template-columns: 1fr;
     }
 }
-<<<<<<< HEAD
 
 
 /* Petsitter page */
@@ -773,5 +859,3 @@ body.petsitter-page .availability-list li.booked span {
 .calendar td.empty {
     background-color: #f8f9fa;
 }
-=======
->>>>>>> main
