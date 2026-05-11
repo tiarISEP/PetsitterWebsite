@@ -1,6 +1,8 @@
 <?php
-require_once 'config.php';
-require_once 'auth.php';
+require_once 'config.php'; //scripts to be determined
+require_once 'auth.php';   //scripts to be determined
+
+startSecureSession();
 
 // Check if already logged in
 if (isUserLoggedIn()) {
@@ -8,14 +10,54 @@ if (isUserLoggedIn()) {
     exit();
 }
 
+//remember me: auto-login via secure token
+if (!isUserLoggedIn() && isset($_COOKIE['remember_token'])) {
+    $token = $_COOKIE['remember_token'];
+
+    //token format: user_id:selector:validator
+    $parts = explode(':', $token);
+    if (count($parts) === 3) {
+        [$user_id, $selector, $validator] = $parts;
+        
+        $stmt = $conn->prepare(
+            "SELECT user_id, token_hash, expires_at FROM remember_tokens
+             WHERE user_id = ? AND selector = ? LIMIT 1"
+        );
+        $stmt->bind_param("is", $user_id, $selector);
+        $stmt->execute();
+        $row = $stmt->get_result()->fetch_assoc();
+
+        if ($row && strtotime($row['expires_at']) > time()
+            && hash_equals($row['token_hash'], hash('sha256', $validator))
+        ) {
+            $user = getUserById($conn, $user_id);
+            if ($user) {
+                session_regenerate_id(true);
+                $_SESSION['user_id'] = $user['id'];
+                $_SESSION['username'] = $user['username'];
+                $_SESSION['user_type'] = $user['user_type'];
+                $_SESSION['login_time'] = time();
+                header("Location: dashboard.php");
+                exit();
+            }
+        }
+        else {
+            // Invalid/expired token - clear cookie
+            setcookie('remember_token', '', time() - 3600, '/','',true,true);
+        }
+    }
+}
+
+
 $error = '';
 $success = '';
 
 // Handle login form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $email = sanitizeInput($_POST['email'] ?? '');
-    $password = sanitizeInput($_POST['password'] ?? '');
+    $email = trim($_POST['email'] ?? '');
+    $password = $_POST['password'] ?? '';
     $remember = isset($_POST['remember-me']) ? true : false;
+    $csrfToken = $_POST['csrf_token'] ?? '';
 
     // Validate inputs
     if (empty($email) || empty($password)) {
@@ -23,44 +65,57 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif (!validateEmail($email)) {
         $error = 'Please enter a valid email address.';
     } else {
-        // Check user in database
-        $user = getUserByEmail($conn, $email);
+        // loginUser() handles: CSRF, rate limiting, 
+        // verify, session_regenerate_id, session population
+        $result = loginUser($conn, $email, $password, $csrfToken);
 
-        if ($user && verifyPassword($password, $user['password'])) {
-            // Login successful
-            $_SESSION['user_id'] = $user['id'];
-            $_SESSION['username'] = $user['username'];
-            $_SESSION['email'] = $user['email'];
-            $_SESSION['user_type'] = $user['user_type'];
+        if ($result === true) {
             $_SESSION['login_time'] = time();
 
-            // Set remember me cookie (30 days)
+            //remember me: secure token
             if ($remember) {
-                setcookie('remember_user', $user['id'], time() + (30 * 24 * 60 * 60), '/');
+                $selector  = bin2hex(random_bytes(16));
+                $validator = bin2hex(random_bytes(32));
+                $tokenHash = hash('sha256', $validator);
+                $expiresAt = date('Y-m-d H:i:s', time() + (30 * 24 * 60 * 60)); //30 days
+                $userId    = $_SESSION['user_id'];
+
+
+                // Store token in database
+                $stmt = $conn->prepare("DELETE FROM remember_tokens WHERE user_id = ?");
+                $stmt->bind_param("i", $userId);
+                $stmt->execute();
+
+                $stmt = $conn->prepare(
+                    "INSERT INTO remember_tokens (user_id, selector, token_hash, expires_at)
+                     VALUES (?, ?, ?, ?)"
+                );
+                $stmt->bind_param("isss", $userId, $selector, $tokenHash, $expiresAt);
+                $stmt->execute();
+
+                // Set cookie: value format user_id:selector:validator
+                setcookie(
+                    'remember_token',
+                    "$userId:$selector:$validator",
+                    time() + (30 * 24 * 60 * 60),
+                    '/', '', true, true //path domain, secure, httponly
+                );
             }
 
             header("Location: dashboard.php");
             exit();
         } else {
+            //$error = $result; //error message from loginUser()
             $error = 'Invalid email or password.';
         }
     }
 }
 
-// Check remember me cookie
-if (!isUserLoggedIn() && isset($_COOKIE['remember_user'])) {
-    $user = getUserById($conn, $_COOKIE['remember_user']);
-    if ($user) {
-        $_SESSION['user_id'] = $user['id'];
-        $_SESSION['username'] = $user['username'];
-        $_SESSION['email'] = $user['email'];
-        $_SESSION['user_type'] = $user['user_type'];
-        $_SESSION['login_time'] = time();
-        header("Location: dashboard.php");
-        exit();
-    }
-}
+//generate CSRF token for the from
+$csrfToken = generateCsrfToken();
+
 ?>
+
 <!DOCTYPE html>
 <html lang="en"> 
 <head>
@@ -69,9 +124,34 @@ if (!isUserLoggedIn() && isset($_COOKIE['remember_user'])) {
     <title>Login | Petsitter's Market</title>
     <meta name="description" content="Sign in to your Petsitter's Market account to manage bookings and pet care services.">
     
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/style.css?v=1.1">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('.password-toggle').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const wrapper = btn.closest('.password-wrapper');
+                const input   = wrapper ? wrapper.querySelector('input') : null;
+                const icon    = btn.querySelector('i');
+
+                if (!input || !icon) return;
+
+                const isHidden = input.type === 'password';
+                input.type = isHidden ? 'text' : 'password';
+
+                icon.classList.toggle('fa-eye',       !isHidden);
+                icon.classList.toggle('fa-eye-slash',  isHidden);
+
+                btn.setAttribute('aria-label',
+                    isHidden ? 'Hide password' : 'Show password'
+                );
+            });
+        });
+    });
+</script>
+
 <body class="login-page">
     <a href="#main-content" class="skip-link" style="position: absolute; left: -9999px;">Aller au contenu principal</a>
 
@@ -97,45 +177,62 @@ if (!isUserLoggedIn() && isset($_COOKIE['remember_user'])) {
 
             <?php if (!empty($error)): ?>
                 <div class="alert alert-error" role="alert">
-                    <i class="fas fa-exclamation-circle"></i> <?php echo htmlspecialchars($error); ?>
-                </div>
-            <?php endif; ?>
-
-            <?php if (!empty($success)): ?>
-                <div class="alert alert-success" role="alert">
-                    <i class="fas fa-check-circle"></i> <?php echo htmlspecialchars($success); ?>
+                    <i class="fas fa-exclamation-circle" aria-hidden="true"></i>
+                    <?php echo escapeOutput($error); ?>
                 </div>
             <?php endif; ?>
 
             <form class="auth-form" action="login.php" method="post" novalidate>
-                <loginBox>
-                    <h2>Email address</h2>
-                    <input type="email" name="email" placeholder="Enter your email address" size="49" required/>
-                </loginBox>
+                <input type="hidden" name="csrf_token" value="<?php echo escapeOutput($csrfToken); ?>" />
 
-                <loginBox>
-                    <h2>Password</h2>
-                    <input type="password" name="password" placeholder="Enter your password" size="49" required/>
-                </loginBox>
+                <div class="form-group">
+                    <label for="email">Email address</label>
+                    <input 
+                        type="email" 
+                        name="email" 
+                        id="email" 
+                        placeholder="Enter your email address" 
+                        value="<?php echo escapeOutput($_POST['email'] ?? ''); ?>"
+                        autocomplete="email"
+                        required
+                    />
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <div class="password-wrapper">
+                        <input 
+                            type="password" 
+                            name="password" 
+                            id="password" 
+                            placeholder="Enter your password" 
+                            autocomplete="current-password"
+                            required
+                        />
+                        <button class="password-toggle" type="button" aria-label="Toggle password visibility">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
 
                 <div class="form-footer-row">
                     <div class="check-box">
-                        <input type="checkbox" name="remember-me" id="remember-me" />
+                        <input type="checkbox" name="remember-me" id="remember-me" 
+                        <?php echo isset($_POST['remember-me']) ? 'checked' : ''; ?> />
                         <label for="remember-me">Remember me</label>
                     </div>
-
                     <div class="forgot-row">
                         <a href="forgot-password.php">Forgot password?</a>
                     </div>
                 </div>
 
-                <input type="submit" value="Sign in" class="cta-button" />
+                <button type="submit" class="cta-button">Sign in</button>
 
                 <div class="divider">or</div>
 
                 <div class="social-row">
                     <button type="button" class="social-button google-login" disabled>Google</button>
-                    <button type="button" class="social-button facebook-login" disabled>Facebook</button>
+                    <button type="button" class="social-button facebook-login" disabled>Facebook</button> <!-- maybe not the facebook implementation -->
                 </div>
 
                 <p class="signin-copy">Don't have an account? <a href="signup.php">Create one here</a></p>
