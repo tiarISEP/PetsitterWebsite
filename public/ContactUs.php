@@ -1,34 +1,51 @@
-<?php 
-// 1. Démarrage de la session (TOUJOURS en première ligne)
-session_start(); 
+<?php
+$pageTitle = "Contact Us | PetSitter's Market";
+require_once 'includes/db.php';
+require_once 'auth.php'; 
 
-// 2. Initialisation des variables de message
+// 1. Démarrage de la session sécurisée (doit inclure auth.php en premier)
+startSecureSession();
+
+// 2. Génération du jeton CSRF
+$csrfToken = generateCsrfToken();
+
+// 3. Initialisation des variables de message
 $errorMsg = '';
 $successMsg = '';
 
-// 3. Traitement du formulaire si la méthode est POST
+// 4. Traitement du formulaire
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    // Nettoyage des entrées pour la sécurité (anti-XSS)
-    $name = htmlspecialchars(trim($_POST['name'] ?? ''));
-    $email = filter_var(trim($_POST['email'] ?? ''), FILTER_SANITIZE_EMAIL);
-    $subject = htmlspecialchars(trim($_POST['subject'] ?? ''));
-    $message = htmlspecialchars(trim($_POST['message'] ?? ''));
-
-    // Validation des données
-    if (empty($name) || empty($email) || empty($subject) || empty($message)) {
-        $errorMsg = "Veuillez remplir tous les champs obligatoires.";
-    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $errorMsg = "Le format de l'adresse email est invalide.";
+    
+    // Vérification stricte du jeton CSRF
+    if (!validateCsrfToken($_POST['csrf_token'] ?? '')) {
+        $errorMsg = "Erreur de sécurité (CSRF). Veuillez rafraîchir la page et réessayer.";
     } else {
-        // C'est ici que tu ajouteras plus tard ta requête SQL (PDO) pour insérer dans la base de données
-        // Exemple : $stmt = $pdo->prepare("INSERT INTO messages ...");
-        
-        $successMsg = "Merci $name ! Votre message a bien été envoyé. Nous vous répondrons rapidement.";
+        // Nettoyage des entrées (Couche Données) : UNIQUEMENT trim()
+        // On n'utilise PAS htmlspecialchars avant d'insérer en base de données.
+        $name = trimInput($_POST['name'] ?? '');
+        $email = trimInput($_POST['email'] ?? '');
+        $subject = trimInput($_POST['subject'] ?? '');
+        $message = trimInput($_POST['message'] ?? '');
+
+        // Validation
+        if (empty($name) || empty($email) || empty($subject) || empty($message)) {
+            $errorMsg = "Veuillez remplir tous les champs obligatoires.";
+        } elseif (!validateEmail($email)) {
+            $errorMsg = "Le format de l'adresse email est invalide.";
+        } else {
+            // C'est ici que tu feras ton $pdo->prepare("INSERT INTO contact_messages ...")
+            // Le PDO te protège déjà des injections SQL.
+            
+            // Couche Vue : On encode UNIQUEMENT pour l'affichage
+            $successMsg = "Merci " . htmlspecialchars($name) . " ! Votre message a bien été envoyé. Nous vous répondrons rapidement.";
+            
+            // On vide les variables pour ne pas réafficher le texte dans le formulaire après succès
+            $name = $email = $subject = $message = ''; 
+        }
     }
 }
 
-// 4. Configuration de la page et inclusion de l'en-tête
-$pageTitle = "Contact Us | PetSitter's Market";
+// Inclusion de l'en-tête
 require_once 'includes/header.php'; 
 ?>
 
@@ -53,24 +70,26 @@ require_once 'includes/header.php';
         <?php endif; ?>
 
         <form action="ContactUs.php" method="post">
+            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrfToken); ?>">
+
             <div class="form-group">
                 <label for="name">Name</label>
-                <input type="text" id="name" name="name" placeholder="John Doe" required>
+                <input type="text" id="name" name="name" placeholder="John Doe" value="<?php echo htmlspecialchars($_POST['name'] ?? ''); ?>" required>
             </div>
 
             <div class="form-group">
                 <label for="email">Email</label>
-                <input type="email" id="email" name="email" placeholder="john@example.com" required>
+                <input type="email" id="email" name="email" placeholder="john@example.com" value="<?php echo htmlspecialchars($_POST['email'] ?? ''); ?>" required>
             </div>
 
             <div class="form-group">
                 <label for="subject">Subject</label>
-                <input type="text" id="subject" name="subject" placeholder="How can we help?" required>
+                <input type="text" id="subject" name="subject" placeholder="How can we help?" value="<?php echo htmlspecialchars($_POST['subject'] ?? ''); ?>" required>
             </div>
 
             <div class="form-group">
                 <label for="message">Message</label>
-                <textarea id="message" name="message" rows="5" placeholder="Write your message here..." required></textarea>
+                <textarea id="message" name="message" rows="5" placeholder="Write your message here..." required><?php echo htmlspecialchars($_POST['message'] ?? ''); ?></textarea>
             </div>
 
             <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Send Message</button>
@@ -80,6 +99,5 @@ require_once 'includes/header.php';
 </main>
 
 <?php 
-// 6. Inclusion du pied de page
 require_once 'includes/footer.php'; 
 ?>

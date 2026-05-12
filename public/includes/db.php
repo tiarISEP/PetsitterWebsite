@@ -1,17 +1,31 @@
 <?php
 // public/includes/db.php
 
-$host = 'localhost';
-$dbname = 'petsitter_db'; 
-$username = 'root'; 
-$password = ''; 
+$envPath = __DIR__ . '/../../.env'; 
+
+if (!file_exists($envPath)) {
+    // En production, on log l'erreur et on affiche un message générique.
+    error_log("Fichier critique .env manquant à l'emplacement : " . $envPath);
+    die("Erreur interne du serveur."); 
+}
+
+// On cache les erreurs du parseur (avec @) et on gère l'échec
+$env = @parse_ini_file($envPath);
+
+if ($env === false) {
+    error_log("Échec de l'analyse du fichier .env. Le fichier est-il mal formaté ?");
+    die("Erreur interne de configuration.");
+}
 
 try {
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $username, $password);
-    // Configuration stricte pour faire crasher le script si une requête SQL est mal écrite
+    $pdo = new PDO(
+        "mysql:host=" . $env['DB_HOST'] . ";dbname=" . $env['DB_NAME'] . ";charset=utf8mb4", 
+        $env['DB_USER'], 
+        $env['DB_PASS']
+    );
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
 } catch(PDOException $e) {
-    die("Erreur fatale de connexion à la base de données : " . $e->getMessage());
+    die("Erreur de connexion à la base de données."); // Ne jamais afficher $e->getMessage() en production !
 }
 ?>
