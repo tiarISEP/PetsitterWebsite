@@ -1,3 +1,67 @@
+<?php
+require_once 'config.php';
+require_once 'auth.php';
+
+startSecureSession();
+
+// Get petsitter ID from URL parameter
+$petsitter_id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+
+if (!$petsitter_id) {
+    header("Location: index.html");
+    exit();
+}
+
+// Fetch petsitter info
+$stmt = $conn->prepare(
+    "SELECT id, username, first_name, last_name, bio, avatar_url, user_type, created_at
+     FROM users WHERE id = ? AND user_type = 'pet-sitter'"
+);
+$stmt->bind_param("i", $petsitter_id);
+$stmt->execute();
+$petsitter = $stmt->get_result()->fetch_assoc();
+
+if (!$petsitter) {
+    header("Location: index.html");
+    exit();
+}
+
+// Fetch reviews for this petsitter with reviewer names
+$stmt = $conn->prepare(
+    "SELECT r.id, r.rating, r.review_text, r.created_at, u.username, u.first_name 
+     FROM reviews r
+     JOIN users u ON r.rater_user_id = u.id
+     WHERE r.rated_user_id = ?
+     ORDER BY r.created_at DESC"
+);
+$stmt->bind_param("i", $petsitter_id);
+$stmt->execute();
+$reviews_result = $stmt->get_result();
+$reviews = $reviews_result->fetch_all(MYSQLI_ASSOC);
+
+// Calculate average rating and stats
+$stmt = $conn->prepare(
+    "SELECT AVG(rating) as avg_rating, COUNT(*) as total_reviews
+     FROM reviews WHERE rated_user_id = ?"
+);
+$stmt->bind_param("i", $petsitter_id);
+$stmt->execute();
+$rating_stats = $stmt->get_result()->fetch_assoc();
+
+$avg_rating = round($rating_stats['avg_rating'] ?? 0, 1);
+$total_reviews = $rating_stats['total_reviews'] ?? 0;
+
+// Generate star display
+$full_stars = (int)$avg_rating;
+$partial_star = $avg_rating - $full_stars;
+$empty_stars = 5 - $full_stars - ($partial_star > 0 ? 1 : 0);
+$stars_html = str_repeat('★', $full_stars);
+if ($partial_star > 0) {
+    $stars_html .= '⭐'; // Half star representation
+}
+$stars_html .= str_repeat('☆', $empty_stars);
+
+?>
 <!DOCTYPE html>
 <html lang="en"> 
 <head>
@@ -46,12 +110,12 @@
                 <div class="content">
                     <div class="image"></div> <!-- utiliser balise <img> -->
                     <div class="info">
-                        <p class="name">Sarah Johnson<!--{user.name}--></p>
-                        <p class="subtitle">Professional Pet Sitter <!--user.qualifications}--> • 5 years experience<!--{user.experience}--></p>
+                        <p class="name"><?php echo escapeOutput($petsitter['first_name'] ? $petsitter['first_name'] . ' ' . ($petsitter['last_name'] ?? '') : $petsitter['username']); ?></p>
+                        <p class="subtitle">Professional Pet Sitter • <?php echo date('Y') - date('Y', strtotime($petsitter['created_at'])); ?> years experience</p>
                         <div class="rating-row">
-                            <span class="stars">★★★★★<!--make a simple prog to calculate stars to display--></span>
-                            <span class="score">5.0<!--{user.rating}--></span>
-                            <span class="reviews">(127 reviews)<!--{user.review_count}--></span>
+                            <span class="stars"><?php echo $stars_html; ?></span>
+                            <span class="score"><?php echo $avg_rating; ?></span>
+                            <span class="reviews">(<?php echo $total_reviews; ?> reviews)</span>
                         </div>
                         <div class="badges">
                             <span>$25/hour<!--{user.hourly_rate}--></span>
@@ -67,9 +131,7 @@
                 <div class="left">
                     <div class="content">
                         <h2>About Me</h2>
-                        <p>Hi there! I'm Sarah, a passionate pet lover with over 5 years of professional pet sitting experience. I understand that your furry family members deserve the best care while you're away, and I'm here to provide exactly that.</p>
-                        <p>I offer personalized care for each pet, maintaining their routine and providing lots of love and attention. Whether it's daily walks, feeding schedules, or just companionship, I treat every pet as if they were my own.</p>
-                        <p>I'm available for both short-term and long-term sitting arrangements, and I always provide regular updates with photos so you can have peace of mind while you're away.</p>
+                        <p><?php echo escapeOutput($petsitter['bio'] ?? 'No bio provided'); ?></p>
                     </div>
                     <div class="content">
                         <h2>Reviews (127)</h2>
