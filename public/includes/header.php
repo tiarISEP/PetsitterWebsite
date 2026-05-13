@@ -17,19 +17,17 @@
             <a href="index.php" class="logo-link">PetSitter's Market</a>
         </div>
         <nav aria-label="Main navigation">
-            <ul>
-                <li><a href="index.php">Home</a></li>
-                <li><a href="services.php">Find Sitters</a></li>
-                <li><a href="about.php">About</a></li>
-                <li><a href="contact.php">Contact</a></li>
-                
-                <?php if(isset($_SESSION['user_id'])): ?>
-                    <li><a href="profile.php" class="btn btn-text">Profile</a></li>
-                    <li><a href="logout.php" class="btn btn-cta">Logout</a></li>
-                <?php else: ?>
-                    <li><a href="login.php" class="btn btn-text">Login</a></li>
-                    <li><a href="signup.php" class="btn btn-cta">Sign Up</a></li>
-                <?php endif; ?>
-            </ul>
-        </nav>
+                <ul>
+                    <li><a href="index.php">Home</a></li>
+                    <li><a href="#">Find Sitters</a></li> <li><a href="#">About</a></li> <li><a href="ContactUs.php">Contact</a></li>
+                    
+                    <?php if(isset($_SESSION['user_id'])): ?>
+                        <li><a href="profile.php" class="btn btn-text">Profile</a></li>
+                        <li><a href="logout.php" class="btn btn-cta">Logout</a></li>
+                    <?php else: ?>
+                        <li><a href="login.php" class="btn btn-text">Login</a></li>
+                        <li><a href="signup.php" class="btn btn-cta">Sign Up</a></li>
+                    <?php endif; ?>
+                </ul>
+            </nav>
     </header>
