@@ -26,6 +26,7 @@ try {
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
 } catch(PDOException $e) {
+    error_log("Échec de connexion PDO : " . $e->getMessage());
     die("Erreur de connexion à la base de données."); // Ne jamais afficher $e->getMessage() en production !
 }
 ?>
