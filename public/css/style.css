@@ -1,18 +1,28 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
 /* --- 1. VARIABLES (Alignées sur la maquette 2026) --- */
 :root {
     /* Couleurs de Marque */
-    --clr-brand: #c09040; /* Marron terreux */
-    --clr-primary: #f0a060; /* Orange d'accentuation */
+    --clr-brand: #c09040; 
+    --clr-primary: #f0a060; 
     --clr-primary-hover: #d98d4f;
-    --clr-cta: #506030; /* Vert foncé (Boutons d'action) */
+    --clr-cta: #506030; 
     --clr-cta-hover: #3e4a25;
     
     /* Typographie et Fonds */
     --clr-text-main: #333333;
-    --clr-text-title: #705030; /* Marron foncé */
-    --clr-bg-page: #f8e8c8; /* Crème clair */
-    --clr-footer: #772F1A; /* Rouge brique */
+    --clr-text-title: #705030; 
+    --clr-bg-page: #f8e8c8; 
+    --clr-footer: #772F1A; 
     --white: #ffffff;
+    
+    /* Alertes */
+    --clr-error-bg: #fce8e8;
+    --clr-error-text: #c81e1e;
+    --clr-error-border: #f8b4b4;
+    --clr-success-bg: #def7ec;
+    --clr-success-text: #03543f;
+    --clr-success-border: #84e1bc;
     
     /* UI Elements */
     --btn-transition: background 0.22s ease;
@@ -20,17 +30,9 @@
     --border-radius-lg: 24px;
     
     /* Layout */
-    --card-border: 1px solid rgba(112, 80, 48, 0.1); /* Bordure subtile teintée */
+    --card-border: 1px solid rgba(112, 80, 48, 0.1); 
     --card-shadow: 0 10px 30px rgba(112, 80, 48, 0.08);
-
-    --clr-error-bg: #fce8e8;
-    --clr-error-text: #c81e1e;
-    --clr-error-border: #f8b4b4;
-    --clr-success-bg: #def7ec;
-    --clr-success-text: #03543f;
-    --clr-success-border: #84e1bc;
 }
-
 
 /* --- 2. RESET BASIQUE --- */
 *, *::before, *::after {
@@ -40,7 +42,7 @@
 }
 
 body {
-    font-family: 'Poppins', sans-serif;
+    font-family: 'Poppins', Arial, sans-serif;
     font-size: 0.9rem;
     color: var(--clr-text-main);
     background-color: var(--clr-bg-page);
@@ -49,12 +51,12 @@ body {
 
 .skip-link {
     position: absolute;
-    width: 1px;
-    height: 1px;
+    width: auto;
+    height: auto;
     padding: 0;
     margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
+    overflow: visible;
+    clip: auto;
     white-space: nowrap;
     border-width: 0;
 }
@@ -69,8 +71,6 @@ body {
 }
 
 /* --- 3. COMPOSANTS RÉUTILISABLES --- */
-
-/* Typographie */
 .title-primary {
     color: var(--clr-text-title);
     text-align: center;
@@ -85,7 +85,7 @@ body {
 }
 
 /* Boutons */
-.btn {
+.btn, .primary-btn, .cta-button {
     display: inline-flex;
     justify-content: center;
     align-items: center;
@@ -98,28 +98,29 @@ body {
     text-decoration: none;
 }
 
-.btn-cta {
+.btn-cta, .cta-button {
     width: 100%;
     background-color: var(--clr-cta);
     color: var(--white);
 }
 
-.btn-cta:hover {
+.btn-cta:hover, .cta-button:hover {
     background-color: var(--clr-cta-hover);
 }
 
-.btn-primary {
+.btn-primary, .primary-btn {
     background-color: var(--clr-primary);
     color: var(--white);
 }
 
-.btn-primary:hover {
+.btn-primary:hover, .primary-btn:hover {
     background-color: var(--clr-primary-hover);
 }
 
 .btn-text {
     background: transparent;
     color: var(--clr-text-title);
+    padding: 0.5rem 1rem;
 }
 
 .btn-text:hover {
@@ -127,9 +128,9 @@ body {
 }
 
 /* Conteneurs (Cards) */
-.card {
+.card, .content {
     background: var(--white);
-    border-radius: var(--border-radius-md);
+    border-radius: var(--border-radius-lg);
     border: var(--card-border);
     box-shadow: var(--card-shadow);
     padding: 2rem;
@@ -159,37 +160,59 @@ body {
 }
 
 /* --- 4. LAYOUTS SPÉCIFIQUES --- */
+main {
+    flex: 1;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
 
-/* Structure commune pour Auth */
-.auth-layout {
-    min-height: 100vh;
+.auth-layout, .middle {
+    min-height: 80vh;
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 2rem 1rem;
+    width: 100%;
 }
 
-.auth-container {
+.auth-container, .middle-content {
     display: flex;
     flex-direction: column;
     align-items: stretch;
     width: min(100%, 420px);
     margin-inline: auto;
+    background: var(--white);
+    padding: 2rem;
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--card-shadow);
 }
 
-/* Formulaire */
-.auth-form {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 1.5rem; 
+.middle-content h1 {
+    color: var(--clr-text-title);
+    margin-bottom: 0.25rem;
+    text-align: center;
+}
+
+.middle-content p {
+    color: var(--clr-text-main);
+    margin-bottom: 1.5rem;
+    text-align: center;
 }
 
 /* --- 5. FORMULAIRES --- */
+.auth-form {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem; 
+}
+
 .form-group {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
-    margin-bottom: 1.5rem;
+    gap: 0.55rem;
+    margin-bottom: 1rem;
 }
 
 .form-group label {
@@ -200,24 +223,117 @@ body {
 
 .form-group input,
 .form-group textarea {
-    padding: 0.85rem;
-    border: 1px solid #d1d5db;
-    border-radius: 8px;
+    width: 100%;
+    padding: 1.1rem 1.2rem;
+    border: 2px solid #e2d9cd;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #fbf8f4 0%, #faf5f0 100%);
+    color: var(--clr-text-main);
+    font-size: 0.95rem;
     font-family: inherit;
-    font-size: 1rem;
-    transition: border-color 0.2s ease;
-    background-color: var(--white);
+    transition: all 0.3s ease;
 }
 
 .form-group input:focus,
 .form-group textarea:focus {
     outline: none;
-    border-color: var(--clr-brand);
-    box-shadow: 0 0 0 3px rgba(192, 144, 64, 0.2);
+    border-color: var(--clr-primary);
+    box-shadow: 0 4px 16px rgba(240, 160, 96, 0.2);
+    background: var(--white);
 }
 
-/* --- 6. NAVIGATION ET FOOTER BASIQUES --- */
+.password-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.password-wrapper input {
+    padding-right: 3rem;
+}
+
+.password-toggle {
+    position: absolute;
+    right: 1rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--clr-brand);
+    font-size: 1.1rem;
+    transition: color 0.3s ease;
+}
+
+.check-box {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    color: var(--clr-text-title);
+    font-size: 0.92rem;
+}
+
+.check-box input {
+    width: 1rem;
+    height: 1rem;
+    accent-color: var(--clr-cta);
+}
+
+.form-footer-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.forgot-row a {
+    color: var(--clr-primary);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.user-type-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.9rem;
+    margin-bottom: 1.5rem;
+}
+
+.user-type-button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 1rem 0.8rem;
+    border-radius: 16px;
+    border: 1px solid #e1d8ca;
+    background: #fbf8f4;
+    color: var(--clr-text-title);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.user-type-button:hover, .user-type-button.selected {
+    border-color: var(--clr-brand);
+    background: var(--white);
+    transform: translateY(-1px);
+}
+
+.divider {
+    display: flex;
+    align-items: center;
+    color: var(--clr-text-title);
+    margin: 1rem 0;
+}
+.divider::before, .divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background-color: #d8d0c2;
+    margin: 0 10px;
+}
+
+/* --- 6. NAVIGATION ET FOOTER --- */
 header {
+    width: 100%;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -246,7 +362,12 @@ nav a {
     font-weight: 500;
 }
 
+nav a:hover {
+    color: var(--clr-primary);
+}
+
 .site-footer {
+    width: 100%;
     background-color: var(--clr-footer); 
     color: var(--white);
     padding: 4rem 2rem 1rem; 
@@ -261,32 +382,24 @@ nav a {
     margin: 0 auto;
 }
 
-.footer-col h3, 
-.footer-col h4 {
-    color: var(--clr-bg-page); /* Crème clair pour contraster sur le rouge brique */
+.footer-col h3 {
+    color: var(--clr-bg-page);
     margin-bottom: 1.2rem;
     font-size: 1.2rem;
 }
 
-.footer-col p {
+.footer-col p, .footer-col a {
     color: #fce8e8;
+    text-decoration: none;
     font-size: 0.95rem;
     line-height: 1.6;
 }
 
 .footer-col ul {
     list-style: none;
-    padding: 0;
     display: flex;
     flex-direction: column;
     gap: 0.75rem; 
-}
-
-.footer-col a {
-    color: #fce8e8;
-    text-decoration: none;
-    transition: color 0.2s ease;
-    font-size: 0.95rem;
 }
 
 .footer-col a:hover {
@@ -303,36 +416,31 @@ nav a {
     color: rgba(255, 255, 255, 0.7);
 }
 
-/* --- 8. UTILITAIRES --- */
-.text-center { text-align: center; }
-.mt-1 { margin-top: 1rem; }
-.mt-2 { margin-top: 2rem; }
-.mb-1 { margin-bottom: 1rem; }
-.mb-2 { margin-bottom: 2rem; }
-.hidden { display: none; }
-
-/* --- 9. PAGE D'ACCUEIL --- */
+/* --- 7. PAGE D'ACCUEIL --- */
 .container {
     max-width: 1200px;
     margin: 4rem auto;
     padding: 0 1rem;
+    width: 100%;
 }
 
-/* Hero Section */
 .hero {
-    /* Utilisation de la couleur de marque pour teinter l'image */
-    background: linear-gradient(rgba(192, 144, 64, 0.8), rgba(192, 144, 64, 0.8)), url('../img/hero-dog.jpg') center/cover;
+    width: 100%;
+    background: linear-gradient(rgba(192, 144, 64, 0.8), rgba(192, 144, 64, 0.8));
     min-height: 60vh;
     display: flex;
     align-items: center;
     justify-content: center;
     text-align: center;
     color: var(--white);
+    padding: 2rem;
 }
 
-.hero h1 { font-size: 3rem; margin-bottom: 1rem; color: var(--white); }
+.hero h1 { 
+    font-size: 3rem; 
+    margin-bottom: 1rem; 
+}
 
-/* Search Bar inside Hero */
 .search-bar {
     max-width: 800px;
     margin: 2rem auto 0;
@@ -360,34 +468,17 @@ nav a {
     background: transparent;
     padding: 0.5rem;
     width: 100%;
+    outline: none;
 }
 
-.search-form .btn-primary {
-    background-color: var(--clr-cta); /* Le bouton de recherche est vert foncé dans la maquette */
-}
-
-.search-form .btn-primary:hover {
-    background-color: var(--clr-cta-hover);
-}
-
-/* Grilles réutilisables */
 .grid-layout {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: 2rem;
 }
 
-/* Cartes Sitter */
 .sitter-card {
     text-align: center;
-}
-
-.sitter-card .btn-primary {
-    background-color: var(--clr-cta); /* Les boutons Book Now sont vert foncé */
-}
-
-.sitter-card .btn-primary:hover {
-    background-color: var(--clr-cta-hover);
 }
 
 .sitter-img {
@@ -401,60 +492,30 @@ nav a {
 .rating { color: var(--clr-brand); font-weight: bold; margin-bottom: 0.5rem; }
 .price { font-size: 1.2rem; font-weight: 700; color: var(--clr-text-title); margin-bottom: 1rem; }
 
-/* --- 10. AUTH & PETSITTER PAGES (Cleaned from PR #4) --- */
-
-.auth-layout, .petsitter-page .middle {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 2rem 1rem;
-}
-
-.auth-container, .middle-content {
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 1rem;
-    max-width: 420px;
-    width: min(100%, 420px);
-    margin-inline: auto;
-}
-
-.middle-content h1 {
-    color: var(--clr-text-title);
-    margin-bottom: 0.25rem;
-    text-align: center;
-}
-
-.middle-content p {
-    color: var(--clr-text-main);
-    margin-bottom: 1.5rem;
-    text-align: center;
-}
-
-/* Petsitter Profile Page Structure */
+/* --- 8. PAGE PETSITTER --- */
 body.petsitter-page .middle {
     width: min(1180px, 100%);
     margin-inline: auto;
     flex-direction: column;
     gap: 2rem;
-    min-height: 100vh;
+    align-items: stretch;
 }
 
-/* Cards & Content Blocks */
-body.petsitter-page .top .content,
-body.petsitter-page .bottom .left .content,
-body.petsitter-page .bottom .right .content {
-    width: 100%;
-    background: var(--white);
-    border-radius: 16px;
-    border: var(--card-border);
-    box-shadow: var(--card-shadow);
-    padding: 2rem;
+body.petsitter-page .top .content {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1.75rem;
 }
 
-/* Sitter Profile Info */
+body.petsitter-page .top .image {
+    width: 180px;
+    aspect-ratio: 1 / 1;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--clr-bg-page), var(--clr-primary));
+    border: 10px solid var(--white);
+}
+
 body.petsitter-page .info .name {
     font-size: clamp(2rem, 2.5vw, 2.4rem);
     color: var(--clr-text-title);
@@ -468,18 +529,36 @@ body.petsitter-page .rating-row {
     gap: 0.75rem;
 }
 
+body.petsitter-page .badges {
+    display: flex;
+    gap: 0.7rem;
+    margin-top: 1rem;
+}
+
 body.petsitter-page .badges span {
     padding: 0.75rem 1rem;
     border-radius: 14px;
-    background: var(--clr-bg-page); /* Crème clair */
+    background: var(--clr-bg-page); 
     color: var(--clr-text-title);
     font-weight: 600;
 }
 
-/* Reviews */
+body.petsitter-page .bottom {
+    display: grid;
+    grid-template-columns: minmax(0, 2.2fr) minmax(300px, 1fr);
+    gap: 1.75rem;
+}
+
+body.petsitter-page .bottom .left,
+body.petsitter-page .bottom .right {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
 body.petsitter-page .review {
     padding: 1.25rem;
-    background: #fffaf0; /* Teinte crème très légère */
+    background: #fffaf0; 
     border-radius: 20px;
     margin-bottom: 1rem;
 }
@@ -491,11 +570,11 @@ body.petsitter-page .review::before {
     color: var(--clr-brand);
 }
 
-/* Calendar table */
 .calendar table {
     width: 100%;
     border-collapse: collapse;
     background: var(--white);
+    margin-top: 1rem;
 }
 
 .calendar th, .calendar td {
@@ -504,5 +583,24 @@ body.petsitter-page .review::before {
     border: 1px solid #eee;
 }
 
-.calendar td.available { background-color: #def7ec; color: #03543f; }
-.calendar td.booked { background-color: #fce8e8; color: #c81e1e; }
+.calendar td.available { background-color: var(--clr-success-bg); color: var(--clr-success-text); }
+.calendar td.booked { background-color: var(--clr-error-bg); color: var(--clr-error-text); }
+
+/* --- 9. UTILITAIRES --- */
+.text-center { text-align: center; }
+.mt-1 { margin-top: 1rem; }
+.mt-2 { margin-top: 2rem; }
+.mb-1 { margin-bottom: 1rem; }
+.mb-2 { margin-bottom: 2rem; }
+.hidden { display: none; }
+
+@media (max-width: 980px) {
+    body.petsitter-page .bottom {
+        grid-template-columns: 1fr;
+    }
+}
+@media (max-width: 520px) {
+    .user-type-row {
+        grid-template-columns: 1fr;
+    }
+}
