@@ -1,5 +1,7 @@
 <?php 
-session_start(); 
+require_once 'includes/auth.php';
+startSecureSession();
+
 $pageTitle = "Home | PetSitter's Market";
 require_once 'includes/header.php'; 
 ?>
@@ -11,7 +13,7 @@ require_once 'includes/header.php';
             <p>Connect with trusted, loving pet sitters in your neighborhood.</p>
             
             <div class="search-bar card">
-                <form action="search.php" method="GET" class="search-form">
+                <form action="#" method="GET" class="search-form">
                     <div class="input-group">
                         <i class="fas fa-map-marker-alt"></i>
                         <input type="text" name="location" placeholder="Where are you looking?">
@@ -64,21 +66,21 @@ require_once 'includes/header.php';
                 <h3>Sarah Johnson</h3>
                 <p class="rating">★★★★★ 5.0 (127 reviews)</p>
                 <p class="price">$25/day</p>
-                <a href="profile.php?id=1" class="btn btn-primary">Book Now</a>
+                <a href="#" class="btn btn-primary">Book Now</a>
             </div>
             <div class="card sitter-card">
                 <div class="sitter-img"></div>
                 <h3>Mike Chen</h3>
                 <p class="rating">★★★★★ 4.9 (89 reviews)</p>
                 <p class="price">$30/day</p>
-                <a href="profile.php?id=2" class="btn btn-primary">Book Now</a>
+                <a href="#" class="btn btn-primary">Book Now</a>
             </div>
             <div class="card sitter-card">
                 <div class="sitter-img"></div>
                 <h3>Emma Davis</h3>
                 <p class="rating">★★★★★ 4.8 (156 reviews)</p>
                 <p class="price">$20/day</p>
-                <a href="profile.php?id=3" class="btn btn-primary">Book Now</a>
+                <a href="#" class="btn btn-primary">Book Now</a>
             </div>
         </div>
     </section>
