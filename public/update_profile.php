@@ -60,10 +60,11 @@ try {
     exit();
 
 } catch (PDOException $e) {
-f ($e->getCode() == 23000) {
+    if ($e->getCode() == 23000) {
         header("Location: profile.php?error=username_taken");
         exit();
-    }    error_log("Erreur DB update_profile (User: $userId): " . $e->getMessage());
+    }
+    error_log("Erreur DB update_profile (User: $userId): " . $e->getMessage());
     header("Location: profile.php?error=update_failed");
     exit();
 }

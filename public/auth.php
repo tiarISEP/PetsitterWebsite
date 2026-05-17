@@ -145,8 +145,13 @@ function setRememberMeCookie($pdo, $user_id) {
     $stmt->execute([$user_id, $selector, $token_hash, $expires_at]);
     
     $isSecure = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on';
-    // Format: selector:validator
-    setcookie('remember_me', $selector . ':' . $validator, time() + 86400 * 30, '/', '', $isSecure, true);
+    setcookie('remember_me', $selector . ':' . $validator, [
+        'expires' => time() + 86400 * 30,
+        'path' => '/',
+        'secure' => $isSecure,
+        'httponly' => true,
+        'samesite' => 'Strict'
+    ]);
 }
 
 //Validates the remember me cookie against the database.
@@ -166,6 +171,8 @@ function verifyRememberMeCookie($pdo) {
     if ($token) {
         // Check if token expired
         if (strtotime($token['expires_at']) < time()) {
+            $delStmt = $pdo->prepare("DELETE FROM remember_tokens WHERE selector = ?");
+            $delStmt->execute([$selector]);
             return false;
         }
         // Verify the hash
