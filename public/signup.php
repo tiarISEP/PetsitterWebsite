@@ -28,7 +28,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $last_name  = trimInput($_POST['last_name'] ?? '');
         $email      = trimInput($_POST['email'] ?? '');
         $password   = $_POST['password'] ?? ''; 
+        $confirm_password = $_POST['confirm_password'] ?? '';
         $user_type  = $_POST['user_type'] ?? 'pet-owner';
+        $terms      = isset($_POST['terms-conditions']);
 
         // Role validation
         $allowed_roles = ['pet-owner', 'pet-sitter'];
@@ -43,6 +45,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } 
         elseif (!validatePassword($password)) {
             $error = "Password must be between 12 and 64 characters, including at least one uppercase letter, one lowercase letter, and one number.";
+        } 
+        elseif (!$terms) {
+            $error = "You must accept the Terms of Service.";
+        } 
+        elseif ($password !== $confirm_password) {
+            $error = "Passwords do not match.";
         } 
         else {
             try {
@@ -65,7 +73,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $_SESSION['user_id'] = $user_id;
                     $_SESSION['username'] = $username;
                     $_SESSION['user_type'] = $user_type;
-                    $_SESSION['user_agent'] = $_SERVER['HTTP_USER_AGENT']; 
                     
                     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
                     
@@ -91,12 +98,12 @@ require_once 'includes/header.php';
         
         <?php if (!empty($error)): ?>
             <div class="alert alert-error">
-                <i class="fas fa-exclamation-circle"></i> <?php echo htmlspecialchars($error); ?>
+                <i class="fas fa-exclamation-circle"></i> <?php echo escapeOutput($error); ?>
             </div>
         <?php endif; ?>
 
         <form class="auth-form" action="signup.php" method="post" novalidate>
-            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrf_token); ?>">
+            <input type="hidden" name="csrf_token" value="<?php echo escapeOutput($csrf_token); ?>">
             
             <div class="user-type-row">
                 <label class="user-type-button" style="display: flex; flex-direction: row; gap: 0.5rem; justify-content: center;">
@@ -111,23 +118,23 @@ require_once 'includes/header.php';
 
             <div class="form-group">
                 <label for="username">Username *</label>
-                <input type="text" id="username" name="username" placeholder="Choose a username" value="<?php echo htmlspecialchars($_POST['username'] ?? ''); ?>" required>
+                <input type="text" id="username" name="username" placeholder="Choose a username" value="<?php echo escapeOutput($_POST['username'] ?? ''); ?>" required>
             </div>
 
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                 <div class="form-group">
                     <label for="first_name">First Name</label>
-                    <input type="text" id="first_name" name="first_name" placeholder="John" value="<?php echo htmlspecialchars($_POST['first_name'] ?? ''); ?>">
+                    <input type="text" id="first_name" name="first_name" placeholder="John" value="<?php echo escapeOutput($_POST['first_name'] ?? ''); ?>">
                 </div>
                 <div class="form-group">
                     <label for="last_name">Last Name</label>
-                    <input type="text" id="last_name" name="last_name" placeholder="Doe" value="<?php echo htmlspecialchars($_POST['last_name'] ?? ''); ?>">
+                    <input type="text" id="last_name" name="last_name" placeholder="Doe" value="<?php echo escapeOutput($_POST['last_name'] ?? ''); ?>">
                 </div>
             </div>
 
             <div class="form-group">
                 <label for="email">Email Address *</label>
-                <input type="email" id="email" name="email" placeholder="john@example.com" value="<?php echo htmlspecialchars($_POST['email'] ?? ''); ?>" required>
+                <input type="email" id="email" name="email" placeholder="john@example.com" value="<?php echo escapeOutput($_POST['email'] ?? ''); ?>" required>
             </div>
             
             <div class="form-group">
@@ -135,6 +142,18 @@ require_once 'includes/header.php';
                 <div class="password-wrapper" style="position: relative;">
                     <input type="password" id="password" name="password" placeholder="At least 12 characters (1 uppercase, 1 number)" required style="width: 100%;">
                 </div>
+            </div>
+
+            <div class="form-group">
+                <label for="confirm_password">Confirm Password *</label>
+                <div class="password-wrapper" style="position: relative;">
+                    <input type="password" id="confirm_password" name="confirm_password" placeholder="Confirm your password" required style="width: 100%;">
+                </div>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem;">
+                <input type="checkbox" name="terms-conditions" id="terms-conditions" required>
+                <label for="terms-conditions" style="font-size: 0.85rem; color: var(--clr-text-title);">I agree to the Terms of Service and Privacy Policy</label>
             </div>
 
             <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Create Account</button>
