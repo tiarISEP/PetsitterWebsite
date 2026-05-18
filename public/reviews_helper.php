@@ -64,14 +64,8 @@ if (mb_strlen($review_text, 'UTF-8') > 250) {
 }
 
 function generateStarsHTML($rating) {
-    $full_stars = (int)$rating;
-    $partial = $rating - $full_stars;
-    $empty_stars = 5 - $full_stars - ($partial > 0 ? 1 : 0);
-    
-    $html = str_repeat('★', $full_stars);
-    if ($partial > 0) $html .= '⭐';
-    $html .= str_repeat('☆', $empty_stars);
-    
-    return $html;
+    $full_stars = (int)round($rating);
+    $empty_stars = 5 - $full_stars;
+    return str_repeat('★', $full_stars) . str_repeat('☆', $empty_stars);
 }
 ?>
