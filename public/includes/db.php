@@ -9,6 +9,7 @@ if (!file_exists($envPath)) {
     exit("Une erreur interne critique est survenue."); 
 }
 
+// Remplacement du @ magique par une vraie gestion d'erreur
 $env = parse_ini_file($envPath);
 
 if ($env === false) {
@@ -25,10 +26,11 @@ try {
     );
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+    $pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
 } catch(PDOException $e) {
-    // On logge silencieusement la vraie erreur SQL
+    // On logge silencieusement la vraie erreur SQL (ex: mauvais mot de passe)
     error_log("Database Connection Error: " . $e->getMessage());
-    // On affiche une erreur 500 propre et on quitte sans utiliser die()
+    // On affiche une erreur 500 propre à l'utilisateur
     header("HTTP/1.1 500 Internal Server Error");
     exit("Le service est temporairement indisponible. Veuillez réessayer plus tard.");
 }

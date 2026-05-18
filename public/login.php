@@ -1,41 +1,56 @@
 <?php
-session_start();
 require_once 'includes/db.php';
 require_once 'auth.php';
 
-// Redirection si déjà connecté
-if (isUserLoggedIn()) {
-    header("Location: dashboard.php");
-    exit();
+// 1. Secure session start
+startSecureSession();
+
+// Redirect if already logged in
+if (!isUserLoggedIn() && isset($_COOKIE['remember_me'])) {
+    $remembered_user_id = verifyRememberMeCookie($pdo);
+    if ($remembered_user_id) {
+        $user = getUserById($pdo, $remembered_user_id);
+        if ($user) {
+            session_regenerate_id(true);
+            $_SESSION['user_id'] = $user['id'];
+            $_SESSION['username'] = $user['username'];
+            $_SESSION['email'] = $user['email'];
+            $_SESSION['user_type'] = $user['user_type'];
+            
+            header("Location: dashboard.php");
+            exit();
+        }
+    }
 }
 
-// 1. Génération du jeton CSRF
+// 2. Centralize CSRF token
 if (empty($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 
 $error = '';
 
-// 2. Traitement du formulaire
+// 3. Form processing
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
-    // Vérification stricte du jeton CSRF
-    if (!hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'] ?? '')) {
-        $error = "Erreur de sécurité (CSRF). Veuillez rafraîchir la page et réessayer.";
+    // CSRF Verification
+    if (!validateCsrfToken($_POST['csrf_token'] ?? '')) {
+        $error = "Security error (CSRF). Please refresh the page and try again.";
     } else {
-        $email = sanitizeInput($_POST['email'] ?? '');
-        $password = sanitizeInput($_POST['password'] ?? '');
+        $email = trimInput($_POST['email'] ?? '');
+        $password = trimInput($_POST['password'] ?? '');
+        $remember_me = isset($_POST['remember-me']) ? true : false;
 
         if (empty($email) || empty($password)) {
             $error = 'Email and password are required.';
         } elseif (!validateEmail($email)) {
             $error = 'Please enter a valid email address.';
         } else {
-            // Utilisation stricte de PDO ($pdo)
+            // Strict PDO usage
             $user = getUserByEmail($pdo, $email);
             
             if ($user && verifyPassword($password, $user['password'])) {
-                // Régénération de l'ID de session pour contrer le vol de session (Session Fixation)
+                // Session Fixation Defense
                 session_regenerate_id(true);
                 
                 $_SESSION['user_id'] = $user['id'];
@@ -43,7 +58,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $_SESSION['email'] = $user['email'];
                 $_SESSION['user_type'] = $user['user_type'];
                 
-                // On renouvelle le token CSRF après le login
+                if ($remember_me) {
+                        setRememberMeCookie($pdo, $user['id']);
+                }
+                
+                // Renew CSRF token after login
                 $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
                 
                 header("Location: dashboard.php");
@@ -66,16 +85,16 @@ require_once 'includes/header.php';
         
         <?php if (!empty($error)): ?>
             <div class="alert alert-error">
-                <i class="fas fa-exclamation-circle"></i> <?php echo htmlspecialchars($error); ?>
+                <i class="fas fa-exclamation-circle"></i> <?php echo escapeOutput($error); ?>
             </div>
         <?php endif; ?>
 
         <form class="auth-form" action="login.php" method="post" novalidate>
-            <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
+            <input type="hidden" name="csrf_token" value="<?php echo escapeOutput($_SESSION['csrf_token']); ?>">            
             
             <div class="form-group">
                 <label for="email">Email address</label>
-                <input type="email" id="email" name="email" placeholder="Enter your email address" value="<?php echo htmlspecialchars($_POST['email'] ?? ''); ?>" required>
+                <input type="email" id="email" name="email" placeholder="Enter your email address" value="<?php echo escapeOutput($_POST['email'] ?? ''); ?>" required>
             </div>
             
             <div class="form-group">
@@ -106,7 +125,6 @@ require_once 'includes/header.php';
 </main>
 
 <script>
-// Script de Romain nettoyé pour révéler le mot de passe
 document.querySelector('.password-toggle').addEventListener('click', function() {
     const input = document.getElementById('password');
     const icon = this.querySelector('i');

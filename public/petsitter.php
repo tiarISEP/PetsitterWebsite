@@ -84,19 +84,19 @@ $stars_html .= str_repeat('☆', $empty_stars);
     <header>
         <div class="logo">
             <!-- Le logo doit TOUJOURS ramener à l'accueil -->
-            <a href="index.html" style="text-decoration: none; color: inherit;">PetSitter's Market</a> 
+            <a href="index.php" style="text-decoration: none; color: inherit;">PetSitter's Market</a> 
         </div>
         <nav aria-label="Navigation principale">
             <ul>
                 <!-- Utilise de vrais chemins pour le multi-pages -->
-                <li><a href="index.html">Home</a></li>
-                <li><a href="services.html">Services</a></li>
-                <li><a href="contact.html">Contact</a></li>
+                <li><a href="index.php">Home</a></li>
+                <li><a href="services.php">Services</a></li>
+                <li><a href="contact.php">Contact</a></li>
                 <li>
-                    <a href="login.html" style="font-weight: 500; color: #772f1a; padding: 0.5rem 1rem;">Login</a>
+                    <a href="login.php" style="font-weight: 500; color: #772f1a; padding: 0.5rem 1rem;">Login</a>
                 </li>
                 <li>
-                    <a href="signup.html" style="background-color: #585123; color: white; padding: 0.5rem 1.5rem; border-radius: 8px; font-weight: 500; text-decoration: none;">Sign Up</a>
+                    <a href="signup.php" style="background-color: #585123; color: white; padding: 0.5rem 1.5rem; border-radius: 8px; font-weight: 500; text-decoration: none;">Sign Up</a>
                 </li>
             </ul>
         </nav>
