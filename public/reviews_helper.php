@@ -36,8 +36,8 @@ function submitReview($pdo, $rater_id, $rated_id, $rating, $review_text) {
         return false;
     }
     
-    if (strlen($review_text) > 250) {
-        return false;
+if (mb_strlen($review_text, 'UTF-8') > 250) {
+    return false;
     }
     
     // Check for duplicate review (one per rater per sitter)
