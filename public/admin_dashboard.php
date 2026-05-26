@@ -388,7 +388,7 @@ require_once 'includes/header.php';
                     </div>
                 </div>
 
-                <h2 style="margin-top: 2rem;">Quick Actions</h2>
+                <!-- <h2 style="margin-top: 2rem;">Quick Actions</h2>
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
                     <a href="?section=users" style="padding: 1rem; background: #eec170; text-decoration: none; border-radius: 8px; text-align: center; color: #333; font-weight: 600; transition: all 0.3s ease;" onmouseover="this.style.backgroundColor='#f2a65a'" onmouseout="this.style.backgroundColor='#eec170'">
                         <i class="fas fa-user-shield"></i><br> Manage Users
@@ -399,7 +399,7 @@ require_once 'includes/header.php';
                     <a href="?section=posts" style="padding: 1rem; background: #eec170; text-decoration: none; border-radius: 8px; text-align: center; color: #333; font-weight: 600; transition: all 0.3s ease;" onmouseover="this.style.backgroundColor='#f2a65a'" onmouseout="this.style.backgroundColor='#eec170'">
                         <i class="fas fa-file-alt"></i><br> Moderate Posts
                     </a>
-                </div>
+                </div> -->
 
             <!--USER MANAGEMENT SECTION-->
             <?php elseif ($section === 'users'): ?>
@@ -408,38 +408,47 @@ require_once 'includes/header.php';
                     <table style="width: 100%; border-collapse: collapse;">
                         <thead style="background-color: #f3f4f6;">
                             <tr>
-                                <th style="padding: 1rem; text-align: left;">ID</th>
-                                <th style="padding: 1rem; text-align: left;">Username</th>
-                                <th style="padding: 1rem; text-align: left;">Email</th>
-                                <th style="padding: 1rem; text-align: left;">Type</th>
-                                <th style="padding: 1rem; text-align: left;">Joined</th>
-                                <th style="padding: 1rem; text-align: left;">Status</th>
-                                <th style="padding: 1rem; text-align: right;">Actions</th>
+                                <th style="padding: 1.25rem; text-align: left;">ID</th>
+                                <th style="padding: 1.25rem; text-align: left;">Username</th>
+                                <th style="padding: 1.25rem; text-align: left;">Email</th>
+                                <!-- <th style="padding: 1.25rem; text-align: left;">Type</th> --> <!-- Admin/Sitter/Owner -->
+                                <th style="padding: 1.25rem; text-align: left;">Admin</th>
+                                <th style="padding: 1.25rem; text-align: left;">Sitter</th>
+                                <th style="padding: 1.25rem; text-align: left;">Owner</th> 
+                                <th style="padding: 1.25rem; text-align: left;">Joined</th>
+                                <th style="padding: 1.25rem; text-align: left;">Status</th>
+                                <th style="padding: 1.25rem; text-align: right;">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php foreach ($users as $u): ?>
                                 <tr>
-                                    <td><?php echo $u['id']; ?></td>
-                                    <td><?php echo escapeOutput($u['username']); ?></td>
-                                    <td><?php echo escapeOutput($u['email']); ?></td>
-                                    <td>
+                                    <td style="padding: 1.25rem;"><?php echo $u['id']; ?></td>
+                                    <td style="padding: 1.25rem;"><?php echo escapeOutput($u['username']); ?></td>
+                                    <td style="padding: 1.25rem;"><?php echo escapeOutput($u['email']); ?></td>
+                                    <td style="padding: 1.25rem;">
                                         <?php if (isset($u['is_admin']) && $u['is_admin']): ?>
-                                            <span class="badge badge-admin">Admin</span>
+                                            <span class="badge badge-admin">Yes</span>
                                         <?php else: ?>
-                                            <?php if (isset($u['is_sitter']) && $u['is_sitter']): ?>
-                                                <span class="badge badge-sitter">Sitter</span>
-                                            <?php endif; ?>
-                                            <?php if (isset($u['is_owner']) && $u['is_owner']): ?>
-                                                <span class="badge badge-owner">Owner</span>
-                                            <?php endif; ?>
-                                            <?php if (!isset($u['is_sitter']) || (!$u['is_sitter'] && !$u['is_owner'])): ?>
-                                                <span style="color: #999;">—</span>
-                                            <?php endif; ?>
+                                            <span style="color: #999;">No</span>
                                         <?php endif; ?>
                                     </td>
-                                    <td><?php echo date('M j, Y', strtotime($u['created_at'])); ?></td>
-                                    <td>
+                                    <td style="padding: 1.25rem;">
+                                        <?php if (isset($u['is_sitter']) && $u['is_sitter']): ?>
+                                            <span class="badge badge-sitter">Yes</span>
+                                        <?php else: ?>
+                                            <span style="color: #999;">No</span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td style="padding: 1.25rem;">
+                                        <?php if (isset($u['is_owner']) && $u['is_owner']): ?>
+                                            <span class="badge badge-owner">Yes</span>
+                                        <?php else: ?>
+                                            <span style="color: #999;">No</span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td style="padding: 1.25rem;"><?php echo date('M j, Y', strtotime($u['created_at'])); ?></td>
+                                    <td style="padding: 1.25rem;">
                                         <?php if ($u['is_banned']): ?>
                                             <span class="badge badge-banned">Banned</span>
                                         <?php else: ?>
@@ -472,7 +481,7 @@ require_once 'includes/header.php';
                     </table>
                 </div>
 
-            REVIEWS SECTION
+            <!--REVIEWS SECTION-->
             <?php elseif ($section === 'reviews'): ?>
                 <h1 class="title-primary" style="text-align: left;">Review Management</h1>
                 <p style="color: #666; margin-bottom: 2rem;">Monitor and manage platform reviews. Disable inappropriate content.</p>
@@ -481,32 +490,32 @@ require_once 'includes/header.php';
                     <table style="width: 100%; border-collapse: collapse;">
                         <thead style="background-color: #f3f4f6;">
                             <tr>
-                                <th style="padding: 1rem; text-align: left;">ID</th>
-                                <th style="padding: 1rem; text-align: left;">From</th>
-                                <th style="padding: 1rem; text-align: left;">About</th>
-                                <th style="padding: 1rem; text-align: left;">Rating</th>
-                                <th style="padding: 1rem; text-align: left;">Review</th>
-                                <th style="padding: 1rem; text-align: left;">Date</th>
-                                <th style="padding: 1rem; text-align: left;">Status</th>
-                                <th style="padding: 1rem; text-align: left;">Actions</th>
+                                <th style="padding: 1.25rem; text-align: left;">ID</th>
+                                <th style="padding: 1.25rem; text-align: left;">From</th>
+                                <th style="padding: 1.25rem; text-align: left;">About</th>
+                                <th style="padding: 1.25rem; text-align: left;">Rating</th>
+                                <th style="padding: 1.25rem; text-align: left;">Review</th>
+                                <th style="padding: 1.25rem; text-align: left;">Date</th>
+                                <th style="padding: 1.25rem; text-align: left;">Status</th>
+                                <th style="padding: 1.25rem; text-align: left;">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php foreach ($reviews as $rev): ?>
                                 <tr>
-                                    <td><?php echo $rev['id']; ?></td>
-                                    <td><?php echo escapeOutput($rev['rater_first_name'] ?: $rev['rater_name']); ?></td>
-                                    <td><?php echo escapeOutput($rev['rated_first_name'] ?: $rev['rated_name']); ?></td>
-                                    <td>
+                                    <td style="padding: 1.25rem;"><?php echo $rev['id']; ?></td>
+                                    <td style="padding: 1.25rem;"><?php echo escapeOutput($rev['rater_first_name'] ?: $rev['rater_name']); ?></td>
+                                    <td style="padding: 1.25rem;"><?php echo escapeOutput($rev['rated_first_name'] ?: $rev['rated_name']); ?></td>
+                                    <td style="padding: 1.25rem;">
                                         <span style="color: #d58337; font-size: 1.1rem;">
                                             <?php echo str_repeat('★', $rev['rating']); ?>
                                         </span>
                                     </td>
-                                    <td style="max-width: 200px; word-break: break-word;">
+                                    <td style="padding: 1.25rem; max-width: 200px; word-break: break-word;">
                                         <?php echo escapeOutput(substr($rev['review_text'] ?? '', 0, 50) . (strlen($rev['review_text'] ?? '') > 50 ? '...' : '')); ?>
                                     </td>
-                                    <td><?php echo date('M j, Y', strtotime($rev['created_at'])); ?></td>
-                                    <td>
+                                    <td style="padding: 1.25rem;"><?php echo date('M j, Y', strtotime($rev['created_at'])); ?></td>
+                                    <td style="padding: 1.25rem;">
                                         <?php if ($rev['is_disabled']): ?>
                                             <span class="badge badge-disabled">Disabled</span>
                                         <?php else: ?>
