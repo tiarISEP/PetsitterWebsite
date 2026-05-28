@@ -9,19 +9,22 @@
 }
 
 .admin-container {
-    display: flex;
+    display: flex !important;
+    justify-content: flex-start !important; 
+    align-items: flex-start !important;     
     gap: 2rem;
     min-height: 70vh;
+    width: 100%;
 }
 
 .admin-sidebar {
     width: 250px;
+    flex-shrink: 0;
     background-color: var(--white);
     border-radius: 8px;
     border: var(--card-border);
     box-shadow: var(--card-shadow);
     padding: 1.5rem 0;
-    align-self: flex-start;
     position: sticky;
     top: 2rem;
 }
@@ -56,8 +59,11 @@
     background-color: rgba(192, 144, 64, 0.1);
 }
 
-.admin-content {
-    flex: 1;
+#main-content .admin-content {
+    flex: 0 1 auto !important;
+    margin: 0 auto !important;
+    width: 100%;
+    max-width: 1000px;
 }
 
 /* --- ADMIN HEADINGS --- */

@@ -327,6 +327,7 @@ require_once 'includes/header.php';
 <link rel="stylesheet" href="css/admin-dashboard.css">
 
 <main id="main-content" class="container">
+    
     <div class="admin-container">
         <!--Sidebar-->
         <aside class="admin-sidebar">
@@ -379,19 +380,6 @@ require_once 'includes/header.php';
                         <p>Total Reviews</p>
                     </div>
                 </div>
-
-                <!-- <h2 style="margin-top: 2rem;">Quick Actions</h2>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
-                    <a href="?section=users" style="padding: 1rem; background: #eec170; text-decoration: none; border-radius: 8px; text-align: center; color: #333; font-weight: 600; transition: all 0.3s ease;" onmouseover="this.style.backgroundColor='#f2a65a'" onmouseout="this.style.backgroundColor='#eec170'">
-                        <i class="fas fa-user-shield"></i><br> Manage Users
-                    </a>
-                    <a href="?section=reviews" style="padding: 1rem; background: #eec170; text-decoration: none; border-radius: 8px; text-align: center; color: #333; font-weight: 600; transition: all 0.3s ease;" onmouseover="this.style.backgroundColor='#f2a65a'" onmouseout="this.style.backgroundColor='#eec170'">
-                        <i class="fas fa-comments"></i><br> Review Management
-                    </a>
-                    <a href="?section=posts" style="padding: 1rem; background: #eec170; text-decoration: none; border-radius: 8px; text-align: center; color: #333; font-weight: 600; transition: all 0.3s ease;" onmouseover="this.style.backgroundColor='#f2a65a'" onmouseout="this.style.backgroundColor='#eec170'">
-                        <i class="fas fa-file-alt"></i><br> Moderate Posts
-                    </a>
-                </div> -->
 
             <!--USER MANAGEMENT SECTION-->
             <?php elseif ($section === 'users'): ?>
