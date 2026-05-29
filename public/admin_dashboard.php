@@ -161,76 +161,59 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         break;
  
                     // ── CGU ────────────────────────────────────────────────
-                    case 'cgu_row_add':
-                        $sec_id    = (int)($_POST['section_id'] ?? 0);
-                        $content   = trim($_POST['content']     ?? '');
-                        $sub_label = trim($_POST['sub_label']   ?? '') ?: null;
-                        if ($sec_id && $content) {
-                            $max = $pdo->prepare("SELECT COALESCE(MAX(sort_order),0)+1 FROM cgu_row WHERE section_id = ?");
-                            $max->execute([$sec_id]);
-                            $sort = $max->fetchColumn();
-                            $pdo->prepare("INSERT INTO cgu_row (section_id, sub_label, content, sort_order) VALUES (?,?,?,?)")
-                                ->execute([$sec_id, $sub_label, $content, $sort]);
-                            $success = 'CGU row added.';
-                        } else { $error = 'Section and content are required.'; }
+                    case 'cgu_version_add':
+                        $version_number = trim($_POST['version_number'] ?? '');
+                        $section_title  = trim($_POST['section_title']  ?? '');
+                        $content        = trim($_POST['content']        ?? '');
+                        $effective_from = trim($_POST['effective_from'] ?? '');
+                        if ($version_number && $section_title && $content && $effective_from) {
+                            $stmt = $pdo->prepare("INSERT INTO cgu_versions (version_number, section_title, content, effective_from, is_active) VALUES (?, ?, ?, ?, 0)");
+                            $stmt->execute([$version_number, $section_title, $content, $effective_from]);
+                            $success = 'CGU version added.';
+                        } else { 
+                            $error = 'Version number, section title, content, and effective date are required.'; 
+                        }
                         break;
  
-                    case 'cgu_row_edit':
-                        $row_id    = (int)($_POST['row_id']   ?? 0);
-                        $content   = trim($_POST['content']   ?? '');
-                        $sub_label = trim($_POST['sub_label'] ?? '') ?: null;
-                        if ($row_id && $content) {
-                            $pdo->prepare("UPDATE cgu_row SET content = ?, sub_label = ? WHERE id = ?")
-                                ->execute([$content, $sub_label, $row_id]);
-                            $success = 'CGU row updated.';
-                        } else { $error = 'Content is required.'; }
+                    case 'cgu_version_edit':
+                        $cgu_id         = (int)($_POST['cgu_id']        ?? 0);
+                        $section_title  = trim($_POST['section_title']  ?? '');
+                        $content        = trim($_POST['content']        ?? '');
+                        $effective_from = trim($_POST['effective_from'] ?? '');
+                        if ($cgu_id && $section_title && $content && $effective_from) {
+                            $stmt = $pdo->prepare("UPDATE cgu_versions SET section_title = ?, content = ?, effective_from = ? WHERE id = ?");
+                            $stmt->execute([$section_title, $content, $effective_from, $cgu_id]);
+                            $success = 'CGU version updated.';
+                        } else { 
+                            $error = 'All fields are required.'; 
+                        }
                         break;
  
-                    case 'cgu_row_toggle':
-                        $row_id = (int)($_POST['row_id'] ?? 0);
-                        $pdo->prepare("UPDATE cgu_row SET is_active = NOT is_active WHERE id = ?")->execute([$row_id]);
-                        $success = 'CGU row visibility toggled.';
+                    case 'cgu_version_activate':
+                        $cgu_id = (int)($_POST['cgu_id'] ?? 0);
+                        if ($cgu_id) {
+                            $pdo->beginTransaction();
+                            // Deactivate all versions
+                            $pdo->prepare("UPDATE cgu_versions SET is_active = 0")->execute();
+                            // Activate selected version
+                            $pdo->prepare("UPDATE cgu_versions SET is_active = 1 WHERE id = ?")->execute([$cgu_id]);
+                            $pdo->commit();
+                            $success = 'CGU version activated.';
+                        }
                         break;
  
-                    case 'cgu_row_delete':
-                        $row_id = (int)($_POST['row_id'] ?? 0);
-                        $pdo->prepare("DELETE FROM cgu_row WHERE id = ?")->execute([$row_id]);
-                        $success = 'CGU row deleted.';
-                        break;
- 
-                    case 'cgu_section_add':
-                        $title      = trim($_POST['title']      ?? '');
-                        $intro_text = trim($_POST['intro_text'] ?? '') ?: null;
-                        if ($title) {
-                            $max = $pdo->query("SELECT COALESCE(MAX(sort_order),0)+1 FROM cgu_section")->fetchColumn();
-                            $num = $pdo->query("SELECT COALESCE(MAX(number),0)+1 FROM cgu_section")->fetchColumn();
-                            $pdo->prepare("INSERT INTO cgu_section (number, title, intro_text, sort_order) VALUES (?,?,?,?)")
-                                ->execute([$num, $title, $intro_text, $max]);
-                            $success = 'CGU section added.';
-                        } else { $error = 'Title is required.'; }
-                        break;
- 
-                    case 'cgu_section_edit':
-                        $sec_id     = (int)($_POST['section_id'] ?? 0);
-                        $title      = trim($_POST['title']       ?? '');
-                        $intro_text = trim($_POST['intro_text']  ?? '') ?: null;
-                        if ($sec_id && $title) {
-                            $pdo->prepare("UPDATE cgu_section SET title = ?, intro_text = ? WHERE id = ?")
-                                ->execute([$title, $intro_text, $sec_id]);
-                            $success = 'CGU section updated.';
-                        } else { $error = 'Title is required.'; }
-                        break;
- 
-                    case 'cgu_section_toggle':
-                        $sec_id = (int)($_POST['section_id'] ?? 0);
-                        $pdo->prepare("UPDATE cgu_section SET is_active = NOT is_active WHERE id = ?")->execute([$sec_id]);
-                        $success = 'CGU section visibility toggled.';
-                        break;
- 
-                    case 'cgu_section_delete':
-                        $sec_id = (int)($_POST['section_id'] ?? 0);
-                        $pdo->prepare("DELETE FROM cgu_section WHERE id = ?")->execute([$sec_id]);
-                        $success = 'CGU section and its rows deleted.';
+                    case 'cgu_version_delete':
+                        $cgu_id = (int)($_POST['cgu_id'] ?? 0);
+                        // Prevent deletion of active version
+                        $stmt = $pdo->prepare("SELECT is_active FROM cgu_versions WHERE id = ?");
+                        $stmt->execute([$cgu_id]);
+                        $cgu = $stmt->fetch();
+                        if ($cgu && $cgu['is_active']) {
+                            $error = 'Cannot delete the active CGU version. Activate another version first.';
+                        } else {
+                            $pdo->prepare("DELETE FROM cgu_versions WHERE id = ?")->execute([$cgu_id]);
+                            $success = 'CGU version deleted.';
+                        }
                         break;
                 }
 
@@ -293,11 +276,9 @@ if ($section === 'faq') {
     $faq_items      = $pdo->query("SELECT f.*, c.label AS cat_label FROM faq f JOIN faq_category c ON f.category_id = c.id ORDER BY f.category_id, f.sort_order")->fetchAll();
 }
 
-$cgu_sections = [];
-$cgu_rows     = [];
+$cgu_versions = [];
 if ($section === 'cgu') {
-    $cgu_sections = $pdo->query("SELECT * FROM cgu_section ORDER BY sort_order")->fetchAll();
-    $cgu_rows     = $pdo->query("SELECT * FROM cgu_row ORDER BY section_id, sort_order")->fetchAll();
+    $cgu_versions = $pdo->query("SELECT * FROM cgu_versions ORDER BY version_number DESC, id")->fetchAll();
 }
  
 
@@ -624,112 +605,68 @@ require_once 'includes/header.php';
 
                 <h1 class="title-primary admin-title">CGU Management</h1>
 
-                <!-- Add Section -->
+                <!-- Add CGU Version -->
                 <div class="add-panel">
-                    <h3><i class="fas fa-plus-circle" style="color:var(--clr-brand);"></i> Add Section</h3>
+                    <h3><i class="fas fa-plus-circle" style="color:var(--clr-brand);"></i> Add CGU Version</h3>
                     <form method="POST">
                         <input type="hidden" name="csrf_token"   value="<?php echo escapeOutput($csrf_token); ?>">
-                        <input type="hidden" name="admin_action" value="cgu_section_add">
+                        <input type="hidden" name="admin_action" value="cgu_version_add">
                         <div class="form-row">
-                            <input class="f-grow" name="title" placeholder="Section title" required>
+                            <input class="f-grow" name="version_number" placeholder="Version (e.g. 1.0, 1.1)" required>
+                            <input class="f-grow" name="effective_from" type="date" required>
                         </div>
                         <div class="form-row">
-                            <textarea class="f-grow" name="intro_text" placeholder="Intro paragraph (optional)"></textarea>
-                            <button class="btn-sm btn-primary-sm" type="submit" style="align-self:flex-end;">Add Section</button>
+                            <input class="f-grow" name="section_title" placeholder="Section title" required>
+                        </div>
+                        <div class="form-row">
+                            <textarea class="f-grow" name="content" placeholder="Section content" required style="min-height:120px;"></textarea>
+                            <button class="btn-sm btn-primary-sm" type="submit" style="align-self:flex-end;">Add Version</button>
                         </div>
                     </form>
                 </div>
 
-                <!-- Sections -->
-                <?php
-                // Group rows by section
-                $rows_by_section = [];
-                foreach ($cgu_rows as $row) {
-                    $rows_by_section[$row['section_id']][] = $row;
-                }
-                foreach ($cgu_sections as $sec):
-                $sec_rows = $rows_by_section[$sec['id']] ?? [];
-                ?>
-                <div class="cgu-sec-block">
-                    <div class="cgu-sec-header">
-                        <span class="cgu-sec-num"><?php echo $sec['number']; ?></span>
-                        <div>
-                            <div class="cgu-sec-title"><?php echo escapeOutput($sec['title']); ?></div>
-                            <?php if ($sec['intro_text']): ?>
-                            <div class="cgu-sec-intro"><?php echo escapeAndWrap($sec['intro_text'], 100); ?></div>
-                            <?php endif; ?>
-                        </div>
-                        <div style="display:flex; gap:.4rem; flex-shrink:0;">
-                            <button class="btn-sm btn-neutral"
-                                onclick="openSecEdit(<?php echo $sec['id']; ?>, <?php echo htmlspecialchars(json_encode($sec['title'])); ?>, <?php echo htmlspecialchars(json_encode($sec['intro_text'] ?? '')); ?>)">Edit</button>
-                            <form method="POST" class="inline-form">
-                                <input type="hidden" name="csrf_token"   value="<?php echo escapeOutput($csrf_token); ?>">
-                                <input type="hidden" name="admin_action" value="cgu_section_toggle">
-                                <input type="hidden" name="section_id"   value="<?php echo $sec['id']; ?>">
-                                <button class="btn-sm <?php echo $sec['is_active']?'btn-warn':'btn-success'; ?>"><?php echo $sec['is_active']?'Hide':'Show'; ?></button>
-                            </form>
-                            <form method="POST" class="inline-form" onsubmit="return confirm('Delete this section and ALL its rows?')">
-                                <input type="hidden" name="csrf_token"   value="<?php echo escapeOutput($csrf_token); ?>">
-                                <input type="hidden" name="admin_action" value="cgu_section_delete">
-                                <input type="hidden" name="section_id"   value="<?php echo $sec['id']; ?>">
-                                <button class="btn-sm btn-danger">Delete</button>
-                            </form>
-                        </div>
-                    </div>
-
-                    <div class="adm-table-wrap" style="border-radius:0 0 8px 8px; border-top:none;">
-                        <table class="adm-table">
-                            <thead><tr>
-                                <th>ID</th><th>Sub-label</th><th>Content</th><th>Status</th><th style="text-align:right;">Actions</th>
-                            </tr></thead>
-                            <tbody>
-                            <?php if (empty($sec_rows)): ?>
-                                <tr><td colspan="5" class="text-center-small">No rows yet.</td></tr>
-                            <?php endif; ?>
-                            <?php foreach ($sec_rows as $row): ?>
-                            <tr>
-                                <td><?php echo $row['id']; ?></td>
-                                <td><span style="font-size:.8rem; color:var(--clr-brand); font-weight:600;"><?php echo $row['sub_label'] ? escapeOutput($row['sub_label']) : '—'; ?></span></td>
-                                <td><span class="wrap"><?php echo escapeAndWrap($row['content'], 100); ?></span></td>
-                                <td><?php echo $row['is_active'] ? '<span class="badge badge-active">Active</span>' : '<span class="badge badge-inactive">Hidden</span>'; ?></td>
-                                <td style="text-align:right; white-space:nowrap;">
-                                    <form method="POST" class="inline-form">
-                                        <input type="hidden" name="csrf_token"   value="<?php echo escapeOutput($csrf_token); ?>">
-                                        <input type="hidden" name="admin_action" value="cgu_row_toggle">
-                                        <input type="hidden" name="row_id"       value="<?php echo $row['id']; ?>">
-                                        <button class="btn-sm <?php echo $row['is_active']?'btn-warn':'btn-success'; ?>"><?php echo $row['is_active']?'Hide':'Show'; ?></button>
-                                    </form>
-                                    <button class="btn-sm btn-neutral"
-                                        onclick="openRowEdit(<?php echo $row['id']; ?>, <?php echo htmlspecialchars(json_encode($row['sub_label'] ?? '')); ?>, <?php echo htmlspecialchars(json_encode($row['content'])); ?>)">Edit</button>
-                                    <form method="POST" class="inline-form" onsubmit="return confirm('Delete this row?')">
-                                        <input type="hidden" name="csrf_token"   value="<?php echo escapeOutput($csrf_token); ?>">
-                                        <input type="hidden" name="admin_action" value="cgu_row_delete">
-                                        <input type="hidden" name="row_id"       value="<?php echo $row['id']; ?>">
-                                        <button class="btn-sm btn-danger">Delete</button>
-                                    </form>
-                                </td>
-                            </tr>
-                            <?php endforeach; ?>
-                            <!-- Add row inline -->
-                            <tr style="background:rgba(240,160,96,.05);">
-                                <td colspan="5" style="padding:.75rem 1.25rem;">
-                                    <form method="POST">
-                                        <input type="hidden" name="csrf_token"   value="<?php echo escapeOutput($csrf_token); ?>">
-                                        <input type="hidden" name="admin_action" value="cgu_row_add">
-                                        <input type="hidden" name="section_id"   value="<?php echo $sec['id']; ?>">
-                                        <div class="form-row">
-                                            <input style="width:160px;" name="sub_label" placeholder="Sub-label (optional)">
-                                            <input class="f-grow" name="content" placeholder="Row content" required>
-                                            <button class="btn-sm btn-primary-sm" type="submit">+ Add Row</button>
-                                        </div>
-                                    </form>
-                                </td>
-                            </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                <!-- CGU Versions -->
+                <div class="card" style="margin-top: 2rem; overflow-x: auto; padding: 0;">
+                    <table class="adm-table">
+                        <thead><tr>
+                            <th>ID</th><th>Version</th><th>Section Title</th><th>Effective Date</th><th>Status</th><th style="text-align:right;">Actions</th>
+                        </tr></thead>
+                        <tbody>
+                        <?php if (empty($cgu_versions)): ?>
+                            <tr><td colspan="6" class="text-center-small">No CGU versions yet.</td></tr>
+                        <?php endif; ?>
+                        <?php foreach ($cgu_versions as $cgu): ?>
+                        <tr>
+                            <td><?php echo $cgu['id']; ?></td>
+                            <td><strong><?php echo escapeOutput($cgu['version_number']); ?></strong></td>
+                            <td><?php echo escapeOutput($cgu['section_title']); ?></td>
+                            <td><?php echo escapeOutput($cgu['effective_from']); ?></td>
+                            <td><?php echo $cgu['is_active'] ? '<span class="badge badge-active">Active</span>' : '<span class="badge badge-inactive">Inactive</span>'; ?></td>
+                            <td style="text-align:right; white-space:nowrap;">
+                                <button class="btn-sm btn-neutral"
+                                    onclick="openCguEdit(<?php echo $cgu['id']; ?>, <?php echo htmlspecialchars(json_encode($cgu['section_title'])); ?>, <?php echo htmlspecialchars(json_encode($cgu['content'])); ?>, <?php echo htmlspecialchars(json_encode($cgu['effective_from'])); ?>)">Edit</button>
+                                <?php if (!$cgu['is_active']): ?>
+                                <form method="POST" class="inline-form">
+                                    <input type="hidden" name="csrf_token"   value="<?php echo escapeOutput($csrf_token); ?>">
+                                    <input type="hidden" name="admin_action" value="cgu_version_activate">
+                                    <input type="hidden" name="cgu_id"       value="<?php echo $cgu['id']; ?>">
+                                    <button class="btn-sm btn-success">Activate</button>
+                                </form>
+                                <form method="POST" class="inline-form" onsubmit="return confirm('Delete this CGU version?')">
+                                    <input type="hidden" name="csrf_token"   value="<?php echo escapeOutput($csrf_token); ?>">
+                                    <input type="hidden" name="admin_action" value="cgu_version_delete">
+                                    <input type="hidden" name="cgu_id"       value="<?php echo $cgu['id']; ?>">
+                                    <button class="btn-sm btn-danger">Delete</button>
+                                </form>
+                                <?php else: ?>
+                                <span class="badge badge-info">Active Version</span>
+                                <?php endif; ?>
+                            </td>
+                        </tr>
+                        <?php endforeach; ?>
+                        </tbody>
+                    </table>
                 </div>
-                <?php endforeach; ?>
 
             <!-- POSTS SECTION -->
             <?php elseif ($section === 'posts'): ?>
@@ -786,55 +723,30 @@ require_once 'includes/header.php';
         document.body.insertAdjacentHTML('beforeend', modal);
     }
 
-    // CGU Section Edit Modal
-    function openSecEdit(secId, title, introText) {
+    // CGU Version Edit Modal
+    function openCguEdit(cguId, sectionTitle, content, effectiveFrom) {
         const modal = `
-            <div class="modal-overlay" id="secEditModal">
+            <div class="modal-overlay" id="cguEditModal">
                 <div class="modal-content">
-                    <h2>Edit CGU Section</h2>
+                    <h2>Edit CGU Version</h2>
                     <form method="POST">
-                        <input type="hidden" name="csrf_token" value="<?php echo $GLOBALS['csrf_token'] ?? ''; ?>">
-                        <input type="hidden" name="admin_action" value="cgu_section_edit">
-                        <input type="hidden" name="section_id" value="${secId}">
+                        <input type="hidden" name="csrf_token" value="<?php echo escapeOutput($csrf_token); ?>">
+                        <input type="hidden" name="admin_action" value="cgu_version_edit">
+                        <input type="hidden" name="cgu_id" value="${cguId}">
                         <div class="modal-form-group">
-                            <label>Title:</label>
-                            <input type="text" name="title" value="${title}" required>
+                            <label>Section Title:</label>
+                            <input type="text" name="section_title" value="${sectionTitle}" required>
                         </div>
                         <div class="modal-form-group">
-                            <label>Intro Text:</label>
-                            <textarea name="intro_text">${introText}</textarea>
-                        </div>
-                        <div class="modal-button-row">
-                            <button type="button" class="btn-sm btn-neutral" onclick="document.getElementById('secEditModal').remove()">Cancel</button>
-                            <button type="submit" class="btn-sm btn-primary-sm">Save</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        `;
-        document.body.insertAdjacentHTML('beforeend', modal);
-    }
-
-    // CGU Row Edit Modal
-    function openRowEdit(rowId, subLabel, content) {
-        const modal = `
-            <div class="modal-overlay" id="rowEditModal">
-                <div class="modal-content">
-                    <h2>Edit CGU Row</h2>
-                    <form method="POST">
-                        <input type="hidden" name="csrf_token" value="<?php echo $GLOBALS['csrf_token'] ?? ''; ?>">
-                        <input type="hidden" name="admin_action" value="cgu_row_edit">
-                        <input type="hidden" name="row_id" value="${rowId}">
-                        <div class="modal-form-group">
-                            <label>Sub-label (optional):</label>
-                            <input type="text" name="sub_label" value="${subLabel}">
+                            <label>Effective From:</label>
+                            <input type="date" name="effective_from" value="${effectiveFrom}" required>
                         </div>
                         <div class="modal-form-group">
                             <label>Content:</label>
-                            <textarea name="content" required>${content}</textarea>
+                            <textarea name="content" required style="min-height:200px;">${content}</textarea>
                         </div>
                         <div class="modal-button-row">
-                            <button type="button" class="btn-sm btn-neutral" onclick="document.getElementById('rowEditModal').remove()">Cancel</button>
+                            <button type="button" class="btn-sm btn-neutral" onclick="document.getElementById('cguEditModal').remove()">Cancel</button>
                             <button type="submit" class="btn-sm btn-primary-sm">Save</button>
                         </div>
                     </form>
