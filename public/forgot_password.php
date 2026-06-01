@@ -1,4 +1,13 @@
 <?php
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
+require_once 'vendor/autoload.php';
+require_once 'includes/db.php';
+require_once 'auth.php';
+
+startSecureSession();
+
 $message = "";
 $message_class = "";
 
@@ -7,9 +16,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (!empty($email)) {
         try {
-            $pdo = new PDO('mysql:host=127.0.0.1;dbname=petsitter_db;charset=utf8mb4', 'root', '');
-            $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
             $stmt = $pdo->prepare("SELECT id FROM users WHERE email = ? LIMIT 1");
             $stmt->execute([$email]);
             $user = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -26,22 +32,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 $reset_link = "http://localhost/PetsitterWebsite/public/ResetPassword.php?selector=" . $selector . "&token=" . $token;
 
-                $to = $email;
-                $subject = "Reinitialisation de votre mot de passe - PetSitter's Market";
-                $email_content = "Bonjour,\n\nPour réinitialiser votre mot de passe, cliquez sur le lien ci-dessous :\n" . $reset_link . "\n\nCe lien expirera dans 1 heure.\n\nL'équipe PetSitter's Market";
-                $headers = "From: no-reply@petsittersmarket.com\r\nReply-To: no-reply@petsittersmarket.com\r\nX-Mailer: PHP/" . phpversion();
+                $mail = new PHPMailer(true);
 
-                if (mail($to, $subject, $email_content, $headers)) {
-                    $message = "Un e-mail de récupération a été envoyé si l'adresse existe.";
-                    $message_class = "success";
-                } else {
-                    $message = "Erreur lors de l'envoi de l'e-mail. Vérifiez la configuration SMTP de votre serveur.";
-                    $message_class = "error";
-                }
+                // Configuration du serveur d'envoi (Exemple avec Mailtrap ou Gmail)
+                $mail->isSMTP();
+                $mail->Host       = 'sandbox.smtp.mailtrap.io'; // Remplace par ton hôte SMTP
+                $mail->SMTPAuth   = true;
+                $mail->Username   = 'TON_IDENTIFIANT';          // Remplace par ton identifiant SMTP
+                $mail->Password   = 'TON_MOT_DE_PASSE';         // Remplace par ton mot de passe SMTP
+                $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+                $mail->Port       = 587;
+
+                $mail->setFrom('no-reply@petsittersmarket.com', "PetSitter's Market");
+                $mail->addAddress($email);
+
+                $mail->isHTML(true);
+                $mail->Subject = "Reinitialisation de votre mot de passe";
+                $mail->Body    = "Bonjour,<br><br>Pour réinitialiser votre mot de passe, cliquez sur le lien ci-dessous :<br><a href='" . $reset_link . "'>" . $reset_link . "</a><br><br>Ce lien expirera dans 1 heure.<br><br>L'équipe PetSitter's Market";
+                $mail->AltBody = "Bonjour,\n\nPour réinitialiser votre mot de passe, cliquez sur le lien ci-dessous :\n" . $reset_link;
+
+                $mail->send();
+                $message = "Un e-mail de récupération a été envoyé si l'adresse existe.";
+                $message_class = "success";
             } else {
                 $message = "Un e-mail de récupération a été envoyé si l'adresse existe.";
                 $message_class = "success";
             }
+        } catch (Exception $e) {
+            $message = "Erreur lors de l'envoi de l'e-mail : " . $mail->ErrorInfo;
+            $message_class = "error";
         } catch (PDOException $e) {
             $message = "Erreur de base de données : " . $e->getMessage();
             $message_class = "error";
@@ -51,29 +70,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $message_class = "error";
     }
 }
+
+$pageTitle = "Mot de passe oublié | PetSitter's Market";
+require_once 'includes/header.php';
 ?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mot de passe oublié | PetSitter's Market</title>
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-</head>
-<body>
-    <header>
-        <div class="logo"><a href="index.html" style="text-decoration: none; color: inherit;">PetSitter's Market</a></div>
-        <nav aria-label="Navigation principale">
-            <ul>
-                <li><a href="index.html">Home</a></li>
-                <li><a href="services.html">Services</a></li>
-                <li><a href="contact.html">Contact</a></li>
-                <li><a href="login.html" style="font-weight: 500; color: #772f1a; padding: 0.5rem 1rem;">Login</a></li>
-                <li><a href="signup.html" style="background-color: #585123; color: white; padding: 0.5rem 1.5rem; border-radius: 8px; font-weight: 500; text-decoration: none;">Sign Up</a></li>
-            </ul>
-        </nav>
-    </header>
 
     <main id="main-content" style="padding: 3rem 1rem; text-align: center;">
         <h1 style="margin-bottom: 1rem; color: #585123;">Mot de passe oublié</h1>
@@ -95,8 +95,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </form>
     </main>
 
-    <footer style="margin-top: 4rem;">
-        <div class="footer-bottom" style="text-align: center; padding: 1rem;">&copy; 2026 Petsitter's Market. All rights reserved.</div>
-    </footer>
-</body>
-</html>
+<?php
+require_once 'includes/footer.php';
+?>

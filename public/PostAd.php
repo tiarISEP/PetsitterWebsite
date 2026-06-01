@@ -1,6 +1,8 @@
 <?php
-session_start();
 require_once 'includes/db.php';
+require_once 'auth.php';
+
+startSecureSession();
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $title = trim($_POST['title'] ?? '');
@@ -19,38 +21,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         exit();
     }
 }
+
+$pageTitle = "Post Ad | PetSitter's Market";
+require_once 'includes/header.php';
 ?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Post Ad | PetSitter's Market</title>
-    <meta name="description" content="Find the perfect sitter for your beloved pet">
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-</head>
-<body>
-    <a href="#main-content" class="skip-link" style="position: absolute; left: -9999px;">Aller au contenu principal</a>
 
-    <header>
-        <div class="logo">
-            <a href="index.html" style="text-decoration: none; color: inherit;">PetSitter's Market</a>
-        </div>
-        <nav aria-label="Navigation principale">
-            <ul>
-                <li><a href="index.html">Home</a></li>
-                <li><a href="services.html">Services</a></li>
-                <li><a href="contact.html">Contact</a></li>
-                <li><a href="login.html" style="font-weight: 500; color: #772f1a; padding: 0.5rem 1rem;">Login</a></li>
-                <li><a href="signup.html" style="background-color: #585123; color: white; padding: 0.5rem 1.5rem; border-radius: 8px; font-weight: 500; text-decoration: none;">Sign Up</a></li>
-            </ul>
-        </nav>
-    </header>
-
-    <h1 style="text-align: center;">Post a Pet Care Ad</h1>
-    <br>
-    <p style="text-align: center;">Find the perfect sitter for your beloved pet </p>
+    <h1 style="text-align: center; margin-top: 2rem;">Post a Pet Care Ad</h1>
+    <p style="text-align: center; color: #666;">Find the perfect sitter for your beloved pet</p>
 
     <main id="main-content">
         <section>
@@ -99,18 +76,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     </div>
                 </div>
 
-                <button type="submit" class="cta-button" style="width: 100%; border: none; cursor: pointer;">Post My Ad</button>
+                <button type="submit" class="cta-button" style="width: 100%; border: none; cursor: pointer; margin-top: 1rem;">Post My Ad</button>
             </form>
         </section>
     </main>
 
-    <footer>
-        <div class="footer-container">
-            <div class="footer-col brand-col">
-                <h2><i class="fas fa-paw"></i> Petsitter's Market</h2>
-                <p>Connecting pet owners with caregiver.</p>
-            </div>
-        </div>
-    </footer>
-</body>
-</html>
+<?php
+require_once 'includes/footer.php';
+?>
