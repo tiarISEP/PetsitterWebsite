@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- SEO de base obligatoire -->
-    <title>Titre de la page spécifique | PetSitter's Market</title>
+    <title>Post Ad | PetSitter's Market</title>
     <meta name="description" content="Description courte et incisive de la page (environ 155 caractères), vitale pour le SEO.">
     
     <!-- CSS & Favicon -->
@@ -37,16 +37,58 @@
             </ul>
         </nav>
     </header>
-
+    <h1 style="text-align: center;">Post a Pet Care Ad</h1> 
+    <br>
+    <p style="text-align: center;">Find the perfect sitter for your beloved pet </p>
     <!-- id="main-content" requis pour le lien d'évitement ci-dessus -->
     <main id="main-content">
-        <!-- 
-            =================================================
-            CONTENU SPÉCIFIQUE À LA PAGE (À INSERER ICI)
-            ================================================= 
-        -->
-        <h1>Titre Principal (Un seul H1 par page)</h1>
         
+        <section>
+            <div class="middle-content">
+                <div id="number-one">
+                <h2>1. Select your pet</h2>
+                <span>Choose from your registered pets</span> <br>
+                <select name="pets" id="pets" aria-placeholder="Select a pet...">
+                    <option value="1">Rufus</option>
+                    <option value="2">Mistigri</option>
+                    <option value="3">Pollux</option>
+                    <option value="4">Martin</option>
+                </select>
+                </div>
+                <div id="number-two">
+                <h2>2. Service Details</h2>
+                <label> Start and End Dates</label>
+                <div> <input type="date" id="startdate" style="width: 49%; display: inline-block;"> 
+                <input type="date" id="enddate" style="width: 49%;display: inline-block;"></div>
+                <label>Address</label> <br>
+                <input type="text" id="address" value="Adress">
+                <p class="small-label">Type of service:</p>
+                    <div class="service-type-row">
+                        <button class="user-type-button" type="button" data-type="dog-walking">
+                            <span>🚶</span>
+                            <strong>Dog Walking</strong>
+                        </button>
+                        <button class="user-type-button" type="button" data-type="pet-sitting">
+                            <span>🏠</span>
+                            <strong>Pet Sitting</strong>
+                        </button>
+                        <button class="user-type-button" type="button" data-type="pet-boarding">
+                            <span>🛏️</span>
+                            <strong>Pet Boarding</strong>
+                        </button>  
+                    </div>
+                </div>
+                <textarea name="AddInfo" rows="4" id="addinfo">Describe any additional requirements, instructions or information about your pet...</textarea>
+                <div id="number-three">
+                <h2>3. Set your budget</h2>
+                <label>Payment offer and type</label>
+                <div> 
+                <input type="number" style="width: 49%;"> <select name="paytype" id="paytype" style="width: 49%;"><option value="1">Card</option> <option value="2">Cash</option></select>
+                </div>
+                </div>
+                <button class="cta-button">Post My Ad</button>
+            </div>
+        </section>
     </main>
 
     <footer>
