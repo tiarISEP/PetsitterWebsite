@@ -4,20 +4,21 @@ require_once 'auth.php';
 
 startSecureSession();
 
-// Accept either ?id=5 or ?username=sarah_pawsome
+// URL: ?id=550e8400-e29b-41d4-a716-446655440000
 if (!empty($_GET['id'])) {
-    $petsitter_id = (int)$_GET['id'];
+    $public_id = trim($_GET['id']);
+
+    // Validate UUID format before hitting the DB
+    if (!preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i', $public_id)) {
+        header("Location: index.php");
+        exit();
+    }
+
     $stmt = $pdo->prepare(
-        "SELECT id, username, first_name, last_name, bio, avatar_url, user_type, created_at
-         FROM users WHERE id = ? AND user_type = 'pet-sitter' AND is_banned = 0"
+        "SELECT id, public_id, username, first_name, last_name, bio, avatar_url, user_type, created_at
+         FROM users WHERE public_id = ? AND user_type = 'pet-sitter' AND is_banned = 0"
     );
-    $stmt->execute([$petsitter_id]);
-} elseif (!empty($_GET['username'])) {
-    $stmt = $pdo->prepare(
-        "SELECT id, username, first_name, last_name, bio, avatar_url, user_type, created_at
-         FROM users WHERE username = ? AND user_type = 'pet-sitter' AND is_banned = 0"
-    );
-    $stmt->execute([trim($_GET['username'])]);
+    $stmt->execute([$public_id]);
 } else {
     header("Location: index.php");
     exit();
