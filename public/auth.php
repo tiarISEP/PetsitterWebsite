@@ -120,7 +120,7 @@ function logoutUser($pdo = null) {
 // --- 7. BASE DE DONNÉES (PDO STRICT) ---
 function getUserById($pdo, $user_id) {
     // Pure PDO implementation
-    $stmt = $pdo->prepare("SELECT id, username, first_name, last_name, email, phone, bio, avatar_url, user_type, created_at FROM users WHERE id = ?");
+    $stmt = $pdo->prepare("SELECT id, username, first_name, last_name, email, phone, bio, avatar_url, user_type, is_admin, is_sitter, is_owner, is_banned, created_at FROM users WHERE id = ?");
     $stmt->execute([$user_id]);
     return $stmt->fetch();
 }
