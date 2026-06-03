@@ -8,15 +8,15 @@ startSecureSession();
 redirectToLogin();
 $user = getUserById($pdo, $_SESSION['user_id']);
 
-// echo "<pre>"; var_dump($user); echo "</pre>"; exit();
-
 if (!$user || !isset($user['is_super_admin']) || $user['is_super_admin'] != 1) {
     header("Location: dashboard.php");
     exit();
 }
 
-// Determine current section
+// Determine current section and search terms
 $section = $_GET['section'] ?? 'overview';
+$search  = trim($_GET['search'] ?? '');
+$search_wildcard = "%{$search}%";
 
 // Handle admin actions
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -30,10 +30,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // PROTECTION: Admin cannot target themselves for destructive actions
         if ($target_user_id && $target_user_id === $_SESSION['user_id']) {
-            $error = "Security Error: You cannot ban or delete your own admin account.";
+            $error = "Security Error: You cannot ban, delete, or modify your own admin account.";
         } else {
             try {
-                switch ($_POST['admin_action'] ?? '') {
+                switch ($admin_action) {
 
                     // ── User / Admin Creation ──────────────────────────────
                     case 'create_user':
@@ -46,22 +46,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $user_type  = $_POST['user_type'] ?? 'owner'; 
 
                         if ($username && $first_name && $last_name && $email && $password) {
+                            $stmt = $pdo->prepare("SELECT COUNT(*) FROM users WHERE username = ? OR email = ?");
+                            $stmt->execute([$username, $email]);
+                            if ($stmt->fetchColumn() > 0) {
+                                $error = 'Username or email already exists.';
+                                break;
+                            }
+
                             $hashed_password = password_hash($password, PASSWORD_DEFAULT);
                             
-                            // Insert query exactly as requested
-                            $stmt = $pdo->prepare("INSERT INTO users (username, first_name, last_name, email, password, user_type) VALUES (?, ?, ?, ?, ?, ?)");
-                            $stmt->execute([$username, $first_name, $last_name, $email, $hashed_password, $user_type]);
+                            $is_admin  = ($admin_action === 'create_admin') ? 1 : 0;
+                            $is_sitter = ($user_type === 'sitter' || $user_type === 'pet-sitter') ? 1 : 0;
+                            $is_owner  = ($user_type === 'owner' || $user_type === 'pet-owner') ? 1 : 0;
                             
-                            // Sync boolean flags for the dashboard display to work properly
-                            $new_user_id = $pdo->lastInsertId();
-                            $is_admin    = ($_POST['admin_action'] === 'create_admin') ? 1 : 0;
-                            $is_sitter   = ($user_type === 'sitter') ? 1 : 0;
-                            $is_owner    = ($user_type === 'owner') ? 1 : 0;
+                            $stmt = $pdo->prepare(
+                                "INSERT INTO users (username, first_name, last_name, email, password, user_type, is_admin, is_sitter, is_owner) 
+                                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
+                            );
+                            $stmt->execute([$username, $first_name, $last_name, $email, $hashed_password, $user_type, $is_admin, $is_sitter, $is_owner]);
                             
-                            $pdo->prepare("UPDATE users SET is_admin = ?, is_sitter = ?, is_owner = ? WHERE id = ?")
-                                ->execute([$is_admin, $is_sitter, $is_owner, $new_user_id]);
-
-                            $success = $is_admin ? 'Admin created successfully.' : 'User created successfully.';
+                            $account_label = $is_admin ? 'Admin' : 'User';
+                            $success = "{$account_label} account created successfully for '" . escapeOutput($username) . "' with visible password: <strong>" . escapeOutput($password) . "</strong>";
                         } else {
                             $error = 'All fields are required to create an account.';
                         }
@@ -72,22 +77,81 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $pdo->prepare("UPDATE users SET is_banned = 1 WHERE id = ?")->execute([$target_user_id]);
                         $success = 'User banned successfully.';
                         break;
+                        
                     case 'unban_user':
                         $pdo->prepare("UPDATE users SET is_banned = 0 WHERE id = ?")->execute([$target_user_id]);
                         $success = 'User unbanned successfully.';
                         break;
+
+                    case 'retract_deletion_vote':
+                        $stmt_check = $pdo->prepare("SELECT username FROM users WHERE id = ?");
+                        $stmt_check->execute([$target_user_id]);
+                        $target_username = $stmt_check->fetchColumn();
+
+                        if ($target_username) {
+                            $stmt = $pdo->prepare("DELETE FROM admin_deletion_votes WHERE target_user_id = ? AND super_admin_id = ?");
+                            $stmt->execute([$target_user_id, $_SESSION['user_id']]);
+                            
+                            if ($stmt->rowCount() > 0) {
+                                $success = "Your deletion vote for admin '" . escapeOutput($target_username) . "' has been successfully retracted.";
+                            } else {
+                                $error = "You have not submitted a deletion vote for this account.";
+                            }
+                        } else {
+                            $error = "Admin not found.";
+                        }
+                        break;
+
                     case 'delete_user':
-                        $pdo->beginTransaction();
-                        $pdo->prepare("DELETE FROM remember_tokens WHERE user_id = ?")->execute([$target_user_id]);
-                        $pdo->prepare("DELETE FROM application WHERE User_userID = ? OR Post_postID IN (SELECT postID FROM post WHERE User_userID = ?)")->execute([$target_user_id, $target_user_id]);
-                        $pdo->prepare("DELETE FROM rating WHERE Rated_userID = ? OR Rater_userID = ?")->execute([$target_user_id, $target_user_id]);
-                        $pdo->prepare("DELETE FROM post_has_animal WHERE Post_postID IN (SELECT postID FROM post WHERE User_userID = ?)")->execute([$target_user_id]);
-                        $pdo->prepare("DELETE FROM post WHERE User_userID = ?")->execute([$target_user_id]);
-                        $pdo->prepare("DELETE FROM animal WHERE User_userID = ?")->execute([$target_user_id]);
-                        $pdo->prepare("DELETE FROM reviews WHERE rater_user_id = ? OR rated_user_id = ?")->execute([$target_user_id, $target_user_id]);
-                        $pdo->prepare("DELETE FROM users WHERE id = ?")->execute([$target_user_id]);
-                        $pdo->commit();
-                        $success = 'User and all related data deleted.';
+                        $stmt_check = $pdo->prepare("SELECT is_admin, is_super_admin, username FROM users WHERE id = ?");
+                        $stmt_check->execute([$target_user_id]);
+                        $target_profile = $stmt_check->fetch();
+
+                        if (!$target_profile) {
+                            $error = "User not found.";
+                            break;
+                        }
+
+                        if ($target_profile['is_admin'] == 1 || $target_profile['is_super_admin'] == 1) {
+                            $pdo->beginTransaction();
+                            
+                            $pdo->prepare("INSERT IGNORE INTO admin_deletion_votes (target_user_id, super_admin_id) VALUES (?, ?)")
+                                ->execute([$target_user_id, $_SESSION['user_id']]);
+                            
+                            $stmt_votes = $pdo->prepare("SELECT COUNT(*) FROM admin_deletion_votes WHERE target_user_id = ?");
+                            $stmt_votes->execute([$target_user_id]);
+                            $total_votes = $stmt_votes->fetchColumn();
+                            
+                            if ($total_votes >= 2) {
+                                $pdo->prepare("DELETE FROM admin_deletion_votes WHERE target_user_id = ?")->execute([$target_user_id]);
+                                $pdo->prepare("DELETE FROM remember_tokens WHERE user_id = ?")->execute([$target_user_id]);
+                                $pdo->prepare("DELETE FROM application WHERE User_userID = ? OR Post_postID IN (SELECT postID FROM post WHERE User_userID = ?)")->execute([$target_user_id, $target_user_id]);
+                                $pdo->prepare("DELETE FROM rating WHERE Rated_userID = ? OR Rater_userID = ?")->execute([$target_user_id, $target_user_id]);
+                                $pdo->prepare("DELETE FROM post_has_animal WHERE Post_postID IN (SELECT postID FROM post WHERE User_userID = ?)")->execute([$target_user_id]);
+                                $pdo->prepare("DELETE FROM post WHERE User_userID = ?")->execute([$target_user_id]);
+                                $pdo->prepare("DELETE FROM animal WHERE User_userID = ?")->execute([$target_user_id]);
+                                $pdo->prepare("DELETE FROM reviews WHERE rater_user_id = ? OR rated_user_id = ?")->execute([$target_user_id, $target_user_id]);
+                                $pdo->prepare("DELETE FROM users WHERE id = ?")->execute([$target_user_id]);
+                                
+                                $pdo->commit();
+                                $success = "Admin account '" . escapeOutput($target_profile['username']) . "' has been permanently deleted after receiving 2 super admin approvals.";
+                            } else {
+                                $pdo->commit();
+                                $success = "Deletion request registered for admin '" . escapeOutput($target_profile['username']) . "'. Currently at 1/2 required Super Admin votes.";
+                            }
+                        } else {
+                            $pdo->beginTransaction();
+                            $pdo->prepare("DELETE FROM remember_tokens WHERE user_id = ?")->execute([$target_user_id]);
+                            $pdo->prepare("DELETE FROM application WHERE User_userID = ? OR Post_postID IN (SELECT postID FROM post WHERE User_userID = ?)")->execute([$target_user_id, $target_user_id]);
+                            $pdo->prepare("DELETE FROM rating WHERE Rated_userID = ? OR Rater_userID = ?")->execute([$target_user_id, $target_user_id]);
+                            $pdo->prepare("DELETE FROM post_has_animal WHERE Post_postID IN (SELECT postID FROM post WHERE User_userID = ?)")->execute([$target_user_id]);
+                            $pdo->prepare("DELETE FROM post WHERE User_userID = ?")->execute([$target_user_id]);
+                            $pdo->prepare("DELETE FROM animal WHERE User_userID = ?")->execute([$target_user_id]);
+                            $pdo->prepare("DELETE FROM reviews WHERE rater_user_id = ? OR rated_user_id = ?")->execute([$target_user_id, $target_user_id]);
+                            $pdo->prepare("DELETE FROM users WHERE id = ?")->execute([$target_user_id]);
+                            $pdo->commit();
+                            $success = 'User and all related data deleted.';
+                        }
                         break;
  
                     // ── Reviews ────────────────────────────────────────────
@@ -209,13 +273,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         }
                         break;
                 }
-
             } catch (PDOException $e) {
-                    if ($pdo->inTransaction()) {
-                        $pdo->rollBack();
-                    }
-                    error_log("Admin Action Failed: " . $e->getMessage());
-                    $error = "Action failed due to a database constraint. Check logs.";
+                if ($pdo->inTransaction()) {
+                    $pdo->rollBack();
+                }
+                error_log("Admin Action Failed: " . $e->getMessage());
+                $error = "Action failed due to a database constraint. Check logs.";
             }
         }
     }
@@ -237,38 +300,57 @@ if ($section === 'overview') {
     $stats['total_reviews'] = $stmt->fetch()['total'];
 }
 
-// Fetch general users
+// Fetch users for user management (Filtered via Search Bar input structural definition)
 $users = [];
 if ($section === 'user_management') {
-    $stmt = $pdo->query(
-        "SELECT id, username, email, is_admin, is_sitter, is_owner, created_at, is_banned 
-         FROM users WHERE is_admin = 0 ORDER BY created_at DESC"
-    );
+    $sql = "SELECT u.id, u.username, u.email, u.is_admin, u.is_sitter, u.is_owner, u.created_at, u.is_banned,
+                   (SELECT COUNT(*) FROM admin_deletion_votes WHERE target_user_id = u.id) as pending_votes
+            FROM users u WHERE u.is_admin = 0";
+    if ($search !== '') {
+        $sql .= " AND (u.username LIKE ? OR u.email LIKE ? OR u.first_name LIKE ? OR u.last_name LIKE ?)";
+        $stmt = $pdo->prepare($sql . " ORDER BY u.created_at DESC");
+        $stmt->execute([$search_wildcard, $search_wildcard, $search_wildcard, $search_wildcard]);
+    } else {
+        $stmt = $pdo->prepare($sql . " ORDER BY u.created_at DESC");
+        $stmt->execute();
+    }
     $users = $stmt->fetchAll();
 }
 
-// Fetch admins
+// Fetch admins (Tracks sub-select votes and checks if current super admin logged in has personally voted)
 $admins = [];
 if ($section === 'admin_management') {
-    $stmt = $pdo->query(
-        "SELECT id, username, email, is_admin, is_sitter, is_owner, created_at, is_banned 
-         FROM users WHERE is_admin = 1 ORDER BY created_at DESC"
-    );
+    $sql = "SELECT u.id, u.username, u.email, u.is_admin, u.is_sitter, u.is_owner, u.created_at, u.is_banned,
+                   (SELECT COUNT(*) FROM admin_deletion_votes WHERE target_user_id = u.id) as pending_votes,
+                   (SELECT COUNT(*) FROM admin_deletion_votes WHERE target_user_id = u.id AND super_admin_id = ?) as caller_has_voted
+            FROM users u WHERE u.is_admin = 1";
+    if ($search !== '') {
+        $sql .= " AND (u.username LIKE ? OR u.email LIKE ?)";
+        $stmt = $pdo->prepare($sql . " ORDER BY u.created_at DESC");
+        $stmt->execute([$_SESSION['user_id'], $search_wildcard, $search_wildcard]);
+    } else {
+        $stmt = $pdo->prepare($sql . " ORDER BY u.created_at DESC");
+        $stmt->execute([$_SESSION['user_id']]);
+    }
     $admins = $stmt->fetchAll();
 }
 
 // Fetch reviews
 $reviews = [];
 if ($section === 'reviews') {
-    $stmt = $pdo->query(
-        "SELECT r.id, r.rating, r.review_text, r.created_at, r.is_disabled,
-                rater.username as rater_name, rater.first_name as rater_first_name,
-                rated.username as rated_name, rated.first_name as rated_first_name
-         FROM reviews r
-         JOIN users rater ON r.rater_user_id = rater.id
-         JOIN users rated ON r.rated_user_id = rated.id
-         ORDER BY r.created_at DESC"
-    );
+    $sql = "SELECT r.id, r.rating, r.review_text, r.created_at, r.is_disabled,
+                   rater.username as rater_name, rater.first_name as rater_first_name,
+                   rated.username as rated_name, rated.first_name as rated_first_name
+            FROM reviews r
+            JOIN users rater ON r.rater_user_id = rater.id
+            JOIN users rated ON r.rated_user_id = rated.id";
+    if ($search !== '') {
+        $sql .= " WHERE rater.username LIKE ? OR rater.first_name LIKE ? OR rated.username LIKE ? OR rated.first_name LIKE ? OR r.review_text LIKE ?";
+        $stmt = $pdo->prepare($sql . " ORDER BY r.created_at DESC");
+        $stmt->execute([$search_wildcard, $search_wildcard, $search_wildcard, $search_wildcard, $search_wildcard]);
+    } else {
+        $stmt = $pdo->query($sql . " ORDER BY r.created_at DESC");
+    }
     $reviews = $stmt->fetchAll();
 }
 
@@ -304,11 +386,9 @@ require_once 'includes/header.php';
 <link rel="stylesheet" href="css/admin-dashboard.css">
 
 <main id="main-content" class="container">
-    
     <div class="admin-container">
         <aside class="admin-sidebar">
             <h3>Super Admin Menu</h3>
-            
             <div class="admin-menu">
                 <a href="?section=overview" class="admin-menu-link <?php echo $section === 'overview' ? 'active' : ''; ?>">Overview</a>
                 <a href="?section=user_management" class="admin-menu-link <?php echo $section === 'user_management' ? 'active' : ''; ?>">User Management</a>
@@ -365,7 +445,7 @@ require_once 'includes/header.php';
                         <div class="form-row">
                             <input class="f-grow" name="username" placeholder="Username" required>
                             <input class="f-grow" name="email" type="email" placeholder="Email Address" required>
-                            <input class="f-grow" name="password" type="password" placeholder="Password" required>
+                            <input class="f-grow" name="password" type="text" placeholder="Password" required>
                         </div>
                         <div class="form-row">
                             <input class="f-grow" name="first_name" placeholder="First Name" required>
@@ -379,7 +459,19 @@ require_once 'includes/header.php';
                     </form>
                 </div>
 
-                <div class="card" style="margin-top: 2rem; overflow-x: auto; padding: 0;">
+                <!-- Functional Search Bar component -->
+                <div class="search-panel" style="margin-top:2rem;">
+                    <form method="GET" style="display:flex; gap:0.5rem; max-width:500px;">
+                        <input type="hidden" name="section" value="user_management">
+                        <input type="text" name="search" value="<?php echo escapeOutput($search); ?>" placeholder="Search username, email, or name..." style="flex-grow:1; padding:0.4rem 0.8rem; border:1px solid #ccc; border-radius:4px;">
+                        <button type="submit" class="btn-sm btn-primary-sm">Search</button>
+                        <?php if ($search !== ''): ?>
+                            <a href="?section=user_management" class="btn-sm" style="background:#ccc; color:#333; text-decoration:none; display:flex; align-items:center; border-radius:4px; padding:0 0.8rem;">Clear</a>
+                        <?php endif; ?>
+                    </form>
+                </div>
+
+                <div class="card" style="margin-top: 1rem; overflow-x: auto; padding: 0;">
                     <table class="adm-table">
                         <thead>
                             <tr>
@@ -394,6 +486,9 @@ require_once 'includes/header.php';
                             </tr>
                         </thead>
                         <tbody>
+                            <?php if (empty($users)): ?>
+                                <tr><td colspan="8" style="text-align:center; padding:2rem; color:#888;">No users found matching requirements.</td></tr>
+                            <?php endif; ?>
                             <?php foreach ($users as $u): ?>
                                 <tr>
                                     <td><?php echo $u['id']; ?></td>
@@ -458,7 +553,7 @@ require_once 'includes/header.php';
                         <div class="form-row">
                             <input class="f-grow" name="username" placeholder="Username" required>
                             <input class="f-grow" name="email" type="email" placeholder="Email Address" required>
-                            <input class="f-grow" name="password" type="password" placeholder="Password" required>
+                            <input class="f-grow" name="password" type="text" placeholder="Password" required>
                         </div>
                         <div class="form-row">
                             <input class="f-grow" name="first_name" placeholder="First Name" required>
@@ -469,30 +564,51 @@ require_once 'includes/header.php';
                     </form>
                 </div>
 
-                <div class="card" style="margin-top: 2rem; overflow-x: auto; padding: 0;">
+                <!-- Functional Search Bar component -->
+                <div class="search-panel" style="margin-top:2rem;">
+                    <form method="GET" style="display:flex; gap:0.5rem; max-width:500px;">
+                        <input type="hidden" name="section" value="admin_management">
+                        <input type="text" name="search" value="<?php echo escapeOutput($search); ?>" placeholder="Search administrative accounts..." style="flex-grow:1; padding:0.4rem 0.8rem; border:1px solid #ccc; border-radius:4px;">
+                        <button type="submit" class="btn-sm btn-primary-sm">Search</button>
+                        <?php if ($search !== ''): ?>
+                            <a href="?section=admin_management" class="btn-sm" style="background:#ccc; color:#333; text-decoration:none; display:flex; align-items:center; border-radius:4px; padding:0 0.8rem;">Clear</a>
+                        <?php endif; ?>
+                    </form>
+                </div>
+
+                <div class="card" style="margin-top: 1rem; overflow-x: auto; padding: 0;">
                     <table class="adm-table">
                         <thead>
                             <tr>
                                 <th>ID</th>
                                 <th>Username</th>
                                 <th>Email</th>
-                                <th>Admin</th>
+                                <th>Deletion State</th>
                                 <th>Joined</th>
                                 <th>Status</th>
                                 <th style="text-align:right;">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
+                            <?php if (empty($admins)): ?>
+                                <tr><td colspan="7" style="text-align:center; padding:2rem; color:#888;">No admin records found.</td></tr>
+                            <?php endif; ?>
                             <?php foreach ($admins as $u): ?>
                                 <tr>
                                     <td><?php echo $u['id']; ?></td>
                                     <td><?php echo escapeOutput($u['username']); ?></td>
                                     <td><?php echo escapeOutput($u['email']); ?></td>
                                     <td>
-                                        <?php if (isset($u['is_admin']) && $u['is_admin']): ?>
-                                            <span class="badge badge-admin">Yes</span>
+                                        <!-- Displays detailed state of deletion votes -->
+                                        <?php if (!empty($u['pending_votes']) && $u['pending_votes'] > 0): ?>
+                                            <span class="badge badge-banned" style="background-color:#e67e22;">
+                                                Pending Deletion (<?php echo (int)$u['pending_votes']; ?>/2 Votes)
+                                            </span>
+                                            <?php if (!empty($u['caller_has_voted']) && $u['caller_has_voted'] > 0): ?>
+                                                <br><small style="color:var(--clr-brand); font-weight:bold;">(You have voted)</small>
+                                            <?php endif; ?>
                                         <?php else: ?>
-                                            <span class="text-disabled">No</span>
+                                            <span style="color:#7f8c8d; font-size:0.9rem;">Stable (0/2 Votes)</span>
                                         <?php endif; ?>
                                     </td>
                                     <td><?php echo date('M j, Y', strtotime($u['created_at'])); ?></td>
@@ -504,24 +620,39 @@ require_once 'includes/header.php';
                                         <?php endif; ?>
                                     </td>
                                     <td style="text-align:right;">
-                                        <form method="POST" class="inline-form">
-                                            <input type="hidden" name="csrf_token" value="<?php echo escapeOutput($csrf_token); ?>">
-                                            <?php if ($u['is_banned']): ?>
-                                                <input type="hidden" name="admin_action" value="unban_user">
-                                                <input type="hidden" name="user_id" value="<?php echo $u['id']; ?>">
-                                                <button type="submit" class="btn-small btn-success">Unban</button>
-                                            <?php else: ?>
-                                                <input type="hidden" name="admin_action" value="ban_user">
-                                                <input type="hidden" name="user_id" value="<?php echo $u['id']; ?>">
-                                                <button type="submit" class="btn-small btn-warning">Ban</button>
+                                        <div style="display:inline-flex; gap:0.35rem; justify-content:flex-end;">
+                                            <form method="POST" class="inline-form">
+                                                <input type="hidden" name="csrf_token" value="<?php echo escapeOutput($csrf_token); ?>">
+                                                <?php if ($u['is_banned']): ?>
+                                                    <input type="hidden" name="admin_action" value="unban_user">
+                                                    <input type="hidden" name="user_id" value="<?php echo $u['id']; ?>">
+                                                    <button type="submit" class="btn-small btn-success">Unban</button>
+                                                <?php else: ?>
+                                                    <input type="hidden" name="admin_action" value="ban_user">
+                                                    <input type="hidden" name="user_id" value="<?php echo $u['id']; ?>">
+                                                    <button type="submit" class="btn-small btn-warning">Ban</button>
+                                                <?php endif; ?>
+                                            </form>
+                                            
+                                            <!-- Retract Deletion Vote structural form button -->
+                                            <?php if (!empty($u['caller_has_voted']) && $u['caller_has_voted'] > 0): ?>
+                                                <form method="POST" class="inline-form" onsubmit="return confirm('Are you sure you want to retract your deletion vote for this admin account?');">
+                                                    <input type="hidden" name="csrf_token" value="<?php echo escapeOutput($csrf_token); ?>">
+                                                    <input type="hidden" name="admin_action" value="retract_deletion_vote">
+                                                    <input type="hidden" name="user_id" value="<?php echo $u['id']; ?>">
+                                                    <button type="submit" class="btn-small" style="background:#7f8c8d; color:#fff;">Retract Vote</button>
+                                                </form>
                                             <?php endif; ?>
-                                        </form>
-                                        <form method="POST" class="inline-form" onsubmit="return confirm('Are you sure you want to delete this admin? This action cannot be undone.');">
-                                            <input type="hidden" name="csrf_token" value="<?php echo escapeOutput($csrf_token); ?>">
-                                            <input type="hidden" name="admin_action" value="delete_user">
-                                            <input type="hidden" name="user_id" value="<?php echo $u['id']; ?>">
-                                            <button type="submit" class="btn-small btn-danger">Delete</button>
-                                        </form>
+
+                                            <form method="POST" class="inline-form" onsubmit="return confirm('Are you sure? Administrative deletions require 2 Super Admin confirmations.');">
+                                                <input type="hidden" name="csrf_token" value="<?php echo escapeOutput($csrf_token); ?>">
+                                                <input type="hidden" name="admin_action" value="delete_user">
+                                                <input type="hidden" name="user_id" value="<?php echo $u['id']; ?>">
+                                                <button type="submit" class="btn-small btn-danger">
+                                                    <?php echo (!empty($u['pending_votes']) && $u['pending_votes'] > 0) ? "Confirm Vote ({$u['pending_votes']}/2)" : "Vote Delete"; ?>
+                                                </button>
+                                            </form>
+                                        </div>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
@@ -533,7 +664,19 @@ require_once 'includes/header.php';
                 <h1 class="title-primary admin-title">Review Management</h1>
                 <p class="admin-subtitle">Monitor and manage platform reviews. Disable inappropriate content.</p>
 
-                <div class="card" style="margin-top: 2rem; overflow-x: auto; padding: 0;">
+                <!-- Functional Search Bar component -->
+                <div class="search-panel" style="margin-top:1.5rem; margin-bottom:1rem;">
+                    <form method="GET" style="display:flex; gap:0.5rem; max-width:500px;">
+                        <input type="hidden" name="section" value="reviews">
+                        <input type="text" name="search" value="<?php echo escapeOutput($search); ?>" placeholder="Search review text, rater, or target..." style="flex-grow:1; padding:0.4rem 0.8rem; border:1px solid #ccc; border-radius:4px;">
+                        <button type="submit" class="btn-sm btn-primary-sm">Search</button>
+                        <?php if ($search !== ''): ?>
+                            <a href="?section=reviews" class="btn-sm" style="background:#ccc; color:#333; text-decoration:none; display:flex; align-items:center; border-radius:4px; padding:0 0.8rem;">Clear</a>
+                        <?php endif; ?>
+                    </form>
+                </div>
+
+                <div class="card" style="margin-top: 1rem; overflow-x: auto; padding: 0;">
                     <table class="adm-table">
                         <thead>
                             <tr>
@@ -548,6 +691,9 @@ require_once 'includes/header.php';
                             </tr>
                         </thead>
                         <tbody>
+                            <?php if (empty($reviews)): ?>
+                                <tr><td colspan="8" style="text-align:center; padding:2rem; color:#888;">No reviews found.</td></tr>
+                            <?php endif; ?>
                             <?php foreach ($reviews as $rev): ?>
                                 <tr>
                                     <td><?php echo $rev['id']; ?></td>
@@ -559,7 +705,7 @@ require_once 'includes/header.php';
                                         </span>
                                     </td>
                                     <td style="max-width: 200px; word-break: break-word;">
-                                        <?php echo escapeAndWRAP($rev['review_text'] ?? '', 100); ?>
+                                        <?php echo escapeAndWrap($rev['review_text'] ?? '', 100); ?>
                                     </td>
                                     <td><?php echo date('M j, Y', strtotime($rev['created_at'])); ?></td>
                                     <td>
@@ -763,12 +909,10 @@ require_once 'includes/header.php';
 </main>
 
 <script>
-    // Confirm before sensitive actions
     function confirmAction(message) {
         return confirm(message);
     }
 
-    // FAQ Edit Modal
     function openFaqEdit(faqId, question, answer) {
         const modal = `
             <div class="modal-overlay" id="faqEditModal">
@@ -797,7 +941,6 @@ require_once 'includes/header.php';
         document.body.insertAdjacentHTML('beforeend', modal);
     }
 
-    // CGU Version Edit Modal
     function openCguEdit(cguId, sectionTitle, content, effectiveFrom) {
         const modal = `
             <div class="modal-overlay" id="cguEditModal">
