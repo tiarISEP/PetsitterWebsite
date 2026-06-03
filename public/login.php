@@ -17,7 +17,7 @@ if (!isUserLoggedIn() && isset($_COOKIE['remember_me'])) {
             $_SESSION['email'] = $user['email'];
             $_SESSION['user_type'] = $user['user_type'];
             
-            header("Location: dashboard.php");
+            header("Location: profile.php");
             exit();
         }
     }
@@ -65,7 +65,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // Renew CSRF token after login
                 $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
                 
-                header("Location: dashboard.php");
+                header("Location: profile.php");
                 exit();
             } else {
                 $error = 'Invalid email or password.';

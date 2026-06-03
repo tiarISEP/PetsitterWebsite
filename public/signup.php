@@ -7,7 +7,7 @@ startSecureSession();
 
 // Redirect if already logged in
 if (isUserLoggedIn()) {
-    header("Location: dashboard.php");
+    header("Location: profile.php");
     exit();
 }
 
@@ -76,7 +76,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     
                     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
                     
-                    header("Location: dashboard.php?welcome=1");
+                    header("Location: profile.php?welcome=1");
                     exit();
                 }
             } catch (PDOException $e) {
