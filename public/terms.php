@@ -1,36 +1,56 @@
 <?php
-require_once __DIR__ . '/includes/db.php';
-require_once __DIR__ . '/auth.php';
+require_once 'includes/db.php';
+require_once 'auth.php';
 
 startSecureSession();
 
+// Fetch active CGU versions
+$cgu_versions = [];
 try {
-    // Synchronisation avec la table 'cgu_versions', colonnes correctes et filtre sur la version active
-$stmt = $pdo->query("SELECT section_title AS title, content FROM cgu_versions WHERE is_active = 1 ORDER BY id ASC");    $terms_list = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $cgu_versions = $pdo->query(
+        "SELECT * FROM cgu_versions WHERE is_active = 1 ORDER BY version_number ASC, id ASC"
+    )->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
-    error_log("Erreur Terms: " . $e->getMessage());
-    $terms_list = [];
-    $errorMessage = "Impossible de charger les conditions. L'équipe technique est notifiée.";
+    error_log("Erreur CGU: " . $e->getMessage());
+    $cgu_versions = [];
 }
 
-require_once __DIR__ . '/includes/header.php';
+$pageTitle = "Terms & Conditions | PetSitter's Market";
+require_once 'includes/header.php';
 ?>
+<link rel="stylesheet" href="css/faq.css">
 
-<main class="terms-container">
-    <h1>Conditions Générales</h1>
-    
-    <?php if (!empty($errorMessage)): ?>
-        <p class="error"><?= escapeOutput($errorMessage) ?></p>
-    <?php elseif (empty($terms_list)): ?>
-        <p>Les conditions générales ne sont pas disponibles pour le moment.</p>
-    <?php else: ?>
-        <?php foreach ($terms_list as $term): ?>
-            <section class="term-item">
-                <h3><?= escapeOutput($term['title']) ?></h3>
-                <p><?= nl2br(escapeOutput($term['content'])) ?></p>
-            </section>
-        <?php endforeach; ?>
-    <?php endif; ?>
+<main id="main-content" class="container">
+    <div class="faq-page-container">
+        <h1 class="title-primary">Terms & Conditions</h1>
+        <p class="subtitle">Please read our terms and conditions carefully before using our service.</p>
+
+        <?php if (empty($cgu_versions)): ?>
+        <div class="alert alert-info">
+            No Terms & Conditions available at this time.
+        </div>
+        <?php else: ?>
+            <?php foreach ($cgu_versions as $section): ?>
+            <div class="faq-category">
+                <h2 class="faq-cat-title">
+                    <?php echo escapeOutput($section['section_title']); ?>
+                </h2>
+                <div class="cgu-content">
+                    <?php echo nl2br(escapeOutput($section['content'])); ?>
+                </div>
+                <div class="cgu-meta">
+                    <strong>Version:</strong> <?php echo escapeOutput($section['version_number']); ?> 
+                    | <strong>Effective from:</strong> <?php echo escapeOutput($section['effective_from']); ?>
+                </div>
+            </div>
+            <?php endforeach; ?>
+        <?php endif; ?>
+
+        <div class="cgu-footer">
+            <p>Last updated: <?php echo date('F d, Y', strtotime($cgu_versions[0]['created_at'] ?? 'now')); ?></p>
+            <p>If you have any questions about these terms, please <a href="ContactUs.php" style="color: var(--clr-primary); font-weight:600; text-decoration:none;">contact us</a>.</p>
+        </div>
+    </div>
 </main>
 
-<?php require_once __DIR__ . '/includes/footer.php'; ?>
+<?php require_once 'includes/footer.php'; ?>

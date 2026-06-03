@@ -1,226 +1,318 @@
-<!DOCTYPE html>
-<html lang="en"> 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- SEO de base obligatoire -->
-    <title>Petsitter profile | PetSitter's Market</title>
-    <meta name="description" content="Description courte et incisive de la page (environ 155 caractères), vitale pour le SEO.">
+<?php
+require_once 'includes/db.php';
+require_once 'auth.php';
 
-    <!-- CSS & Favicon -->
-    <!-- Utilise des chemins relatifs absolus par rapport à la racine si tu as des sous-dossiers -->
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <!-- <link rel="icon" href="/favicon.ico" type="image/x-icon"> -->
-</head>
-<body class="petsitter-page">
-    <!-- Accessibilité : Lien d'évitement -->
-    <a href="#main-content" class="skip-link" style="position: absolute; left: -9999px;">Aller au contenu principal</a>
+startSecureSession();
 
-    <header>
-        <div class="logo">
-            <!-- Le logo doit TOUJOURS ramener à l'accueil -->
-            <a href="index.php" style="text-decoration: none; color: inherit;">PetSitter's Market</a> 
+// Get the petsitter identifier (can be public_id or numerical id)
+$sitter_id = $_GET['id'] ?? '';
+
+if (empty($sitter_id)) {
+    die("<h2 style='text-align:center; margin-top:50px;'>No sitter specified.</h2>");
+}
+
+// Fetch sitter info
+$stmt = $pdo->prepare("SELECT * FROM users WHERE (public_id = ? OR id = ?) AND user_type = 'pet-sitter'");
+$stmt->execute([$sitter_id, $sitter_id]);
+$sitter = $stmt->fetch();
+
+if (!$sitter) {
+    die("<h2 style='text-align:center; margin-top:50px;'>Pet sitter not found.</h2>");
+}
+
+$petsitter_id = $sitter['id'];
+
+// Get rating stats
+$stmt = $pdo->prepare("
+    SELECT AVG(rating) as avg_rating, COUNT(*) as total_reviews 
+    FROM reviews 
+    WHERE rated_user_id = ? AND is_disabled = 0
+");
+$stmt->execute([$petsitter_id]);
+$rating_stats = $stmt->fetch();
+
+$avg_rating    = round($rating_stats['avg_rating']    ?? 0, 1);
+$total_reviews = (int)($rating_stats['total_reviews'] ?? 0);
+
+// Star display logic
+$full_stars  = (int)$avg_rating;
+$has_partial = ($avg_rating - $full_stars) >= 0.5;
+$empty_stars = 5 - $full_stars - ($has_partial ? 1 : 0);
+$stars_html  = str_repeat('★', $full_stars)
+             . ($has_partial ? '½' : '')
+             . str_repeat('☆', $empty_stars);
+
+// Check if logged-in user already left a review
+$user_already_reviewed = false;
+$can_review = false;
+if (isUserLoggedIn()) {
+    $stmt = $pdo->prepare("SELECT id FROM reviews WHERE rater_user_id = ? AND rated_user_id = ?");
+    $stmt->execute([$_SESSION['user_id'], $petsitter_id]);
+    $user_already_reviewed = (bool)$stmt->fetch();
+    // Only owners can leave reviews, and not on their own profile
+    $can_review = !empty($_SESSION['is_owner']) && $_SESSION['user_id'] !== $petsitter_id;
+}
+
+// Handle review submission
+$review_error   = '';
+$review_success = '';
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_review'])) {
+    if (!isUserLoggedIn()) {
+        $review_error = 'You must be logged in to leave a review.';
+    } elseif (!validateCsrfToken($_POST['csrf_token'] ?? '')) {
+        $review_error = 'Invalid request. Please try again.';
+    } elseif (!$can_review) {
+        $review_error = 'Only pet owners can leave reviews.';
+    } elseif ($user_already_reviewed) {
+        $review_error = 'You have already reviewed this pet sitter.';
+    } else {
+        $rating = (int)($_POST['rating'] ?? 0);
+        $review_text = trim($_POST['review_text'] ?? '');
+        
+        if ($rating < 1 || $rating > 5) {
+            $review_error = 'Please select a rating between 1 and 5.';
+        } elseif (strlen($review_text) < 10) {
+            $review_error = 'Review text must be at least 10 characters long.';
+        } elseif (strlen($review_text) > 250) {
+            $review_error = 'Review text cannot exceed 250 characters.';
+        } else {
+            try {
+                $stmt = $pdo->prepare("
+                    INSERT INTO reviews (rater_user_id, rated_user_id, rating, review_text) 
+                    VALUES (?, ?, ?, ?)
+                ");
+                $stmt->execute([$_SESSION['user_id'], $petsitter_id, $rating, $review_text]);
+                $review_success = 'Thank you! Your review has been submitted successfully.';
+                $user_already_reviewed = true;
+                
+                // Recalculate rating stats
+                $stmt = $pdo->prepare("
+                    SELECT AVG(rating) as avg_rating, COUNT(*) as total_reviews 
+                    FROM reviews 
+                    WHERE rated_user_id = ? AND is_disabled = 0
+                ");
+                $stmt->execute([$petsitter_id]);
+                $rating_stats = $stmt->fetch();
+                $avg_rating    = round($rating_stats['avg_rating']    ?? 0, 1);
+                $total_reviews = (int)($rating_stats['total_reviews'] ?? 0);
+                
+                // Recalculate stars
+                $full_stars  = (int)$avg_rating;
+                $has_partial = ($avg_rating - $full_stars) >= 0.5;
+                $empty_stars = 5 - $full_stars - ($has_partial ? 1 : 0);
+                $stars_html  = str_repeat('★', $full_stars)
+                             . ($has_partial ? '½' : '')
+                             . str_repeat('☆', $empty_stars);
+            } catch (PDOException $e) {
+                $review_error = 'Failed to submit review due to a database error.';
+            }
+        }
+    }
+}
+
+// Fetch all reviews for this sitter
+$stmt = $pdo->prepare("
+    SELECT r.*, u.username, u.first_name, u.last_name, u.avatar_url 
+    FROM reviews r 
+    JOIN users u ON r.rater_user_id = u.id 
+    WHERE r.rated_user_id = ? AND r.is_disabled = 0 
+    ORDER BY r.created_at DESC
+");
+$stmt->execute([$petsitter_id]);
+$sitter_reviews = $stmt->fetchAll();
+
+$pageTitle = htmlspecialchars($sitter['first_name'] . ' ' . $sitter['last_name']) . "'s Profile | PetSitter's Market";
+require_once 'includes/header.php';
+?>
+<script>
+    // Dynamically apply petsitter-page class to body
+    document.body.classList.add('petsitter-page');
+</script>
+
+<main id="main-content" class="petsitter-profile">
+    <div class="middle">
+        <div class="top">
+            <div class="content">
+                <?php if (!empty($sitter['avatar_url'])): ?>
+                    <img src="<?php echo htmlspecialchars($sitter['avatar_url']); ?>" alt="Avatar" class="image" style="object-fit: cover;">
+                <?php else: ?>
+                    <div class="image" style="display:flex; align-items:center; justify-content:center; background:linear-gradient(135deg, var(--clr-bg-page), var(--clr-primary)); color:var(--clr-text-title); font-weight:bold; font-size:2rem;"><?php echo strtoupper(substr($sitter['first_name'] ?? $sitter['username'], 0, 2)); ?></div>
+                <?php endif; ?>
+                
+                <h1 class="name" style="font-size: 1.8rem; color: var(--clr-text-title); font-weight: 700; margin: 0;"><?php echo htmlspecialchars($sitter['first_name'] . ' ' . $sitter['last_name']); ?></h1>
+                <p class="subtitle" style="margin: 0; font-size: 0.9rem; color: #666;">Professional Pet Sitter • Member since <?php echo date('Y', strtotime($sitter['created_at'])); ?></p>
+                
+                <div class="rating-row">
+                    <span class="stars" style="color: var(--clr-brand); font-size: 1.2rem;"><?php echo $stars_html; ?></span>
+                    <span class="score" style="font-size: 1.1rem; font-weight: 600;"><?php echo $avg_rating > 0 ? $avg_rating : 'No ratings'; ?></span>
+                    <span class="reviews" style="font-size: 0.9rem; color: #666;">(<?php echo $total_reviews; ?> review<?php echo $total_reviews !== 1 ? 's' : ''; ?>)</span>
+                </div>
+                
+                <div class="badges">
+                    <span><i class="fas fa-user-check"></i> Verified Sitter</span>
+                    <?php if(!empty($sitter['phone'])): ?>
+                        <span><i class="fas fa-phone"></i> <?php echo htmlspecialchars($sitter['phone']); ?></span>
+                    <?php endif; ?>
+                </div>
+                
+                <a href="mailto:<?php echo htmlspecialchars($sitter['email']); ?>" class="primary-btn" style="text-decoration:none; text-align: center; width: 100%;">Send Email</a>
+            </div>
         </div>
-        <nav aria-label="Navigation principale">
-            <ul>
-                <!-- Utilise de vrais chemins pour le multi-pages -->
-                <li><a href="index.php">Home</a></li>
-                <li><a href="services.php">Services</a></li>
-                <li><a href="contact.php">Contact</a></li>
-                <li>
-                    <a href="login.php" style="font-weight: 500; color: #772f1a; padding: 0.5rem 1rem;">Login</a>
-                </li>
-                <li>
-                    <a href="signup.php" style="background-color: #585123; color: white; padding: 0.5rem 1.5rem; border-radius: 8px; font-weight: 500; text-decoration: none;">Sign Up</a>
-                </li>
-            </ul>
-        </nav>
-    </header>
 
-    <!-- id="main-content" requis pour le lien d'évitement ci-dessus -->
-    <main id="main-content">
-
-        <div class="middle">
-            <div class="top">
+        <div class="bottom">
+            <div class="left">
                 <div class="content">
-                    <div class="image"></div> <!-- utiliser balise <img> -->
-                    <div class="info">
-                        <p class="name">Sarah Johnson<!--{user.name}--></p>
-                        <p class="subtitle">Professional Pet Sitter <!--user.qualifications}--> • 5 years experience<!--{user.experience}--></p>
-                        <div class="rating-row">
-                            <span class="stars">★★★★★<!--make a simple prog to calculate stars to display--></span>
-                            <span class="score">5.0<!--{user.rating}--></span>
-                            <span class="reviews">(127 reviews)<!--{user.review_count}--></span>
-                        </div>
-                        <div class="badges">
-                            <span>$25/hour<!--{user.hourly_rate}--></span>
-                            <span>Available<!--{user.available}--></span>
-                            <span>2 miles away<!--{user.distance}--><!--calculate an estimate of distance in km--></span>
-                        </div>
-                        <button class="primary-btn">Send Message<!--redirect to the messagae page--></button>
-                    </div>
+                    <h2>About Me</h2>
+                    <p><?php echo nl2br(htmlspecialchars($sitter['bio'] ?: "This pet sitter hasn't written a biography yet.")); ?></p>
                 </div>
+                
+                <div class="content">
+                    <h2>Reviews (<?php echo $total_reviews; ?>)</h2>
+                    
+                    <?php if (empty($sitter_reviews)): ?>
+                        <p style="color: #666; font-style: italic;">No reviews yet. Be the first to leave a review!</p>
+                    <?php else: ?>
+                        <div class="reviews-list">
+                            <?php foreach ($sitter_reviews as $rev): ?>
+                                <div class="review-card">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                                        <strong style="color: var(--clr-text-title);"><?php echo htmlspecialchars(($rev['first_name'] ?? '') . ' ' . ($rev['last_name'] ?? '')) ?: htmlspecialchars($rev['username']); ?></strong>
+                                        <span style="color: var(--clr-brand);"><?php echo str_repeat('★', $rev['rating']) . str_repeat('☆', 5 - $rev['rating']); ?></span>
+                                    </div>
+                                    <p>“<?php echo htmlspecialchars($rev['review_text']); ?>”</p>
+                                    <small style="color: #888; font-size: 0.8rem;"><?php echo date('d M Y', strtotime($rev['created_at'])); ?></small>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
+                </div>
+
+                <!-- Leave a Review Section -->
+                <?php if (isUserLoggedIn()): ?>
+                    <?php if ($can_review && !$user_already_reviewed): ?>
+                        <div class="content" style="margin-top: 1.5rem;">
+                            <h2>Leave a Review</h2>
+                            <?php if (!empty($review_error)): ?>
+                                <div class="alert alert-error"><i class="fas fa-exclamation-circle"></i> <?php echo htmlspecialchars($review_error); ?></div>
+                            <?php endif; ?>
+                            <?php if (!empty($review_success)): ?>
+                                <div class="alert alert-success"><i class="fas fa-check-circle"></i> <?php echo htmlspecialchars($review_success); ?></div>
+                            <?php endif; ?>
+                            
+                            <form method="POST" action="petsitter.php?id=<?php echo htmlspecialchars($sitter_id); ?>" class="auth-form" style="display: flex; flex-direction: column; gap: 1rem; margin-top: 1rem;">
+                                <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
+                                
+                                <div class="form-group" style="margin-bottom: 0;">
+                                    <label for="rating">Rating</label>
+                                    <select name="rating" id="rating" required style="width: 100%; padding: 0.8rem; border-radius: 8px; border: 1px solid #ddd; font-family: inherit;">
+                                        <option value="5">★★★★★ (5/5)</option>
+                                        <option value="4">★★★★☆ (4/5)</option>
+                                        <option value="3">★★★☆☆ (3/5)</option>
+                                        <option value="2">★★☆☆☆ (2/5)</option>
+                                        <option value="1">★☆☆☆☆ (1/5)</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group" style="margin-bottom: 0;">
+                                    <label for="review_text">Review Description</label>
+                                    <textarea name="review_text" id="review_text" rows="4" placeholder="Share your experience with this pet sitter (min 10 characters)..." required style="width: 100%; padding: 0.8rem; border-radius: 8px; border: 1px solid #ddd; font-family: inherit; resize: vertical;"></textarea>
+                                </div>
+                                
+                                <button type="submit" name="submit_review" class="btn btn-primary" style="align-self: flex-start; padding: 0.75rem 1.5rem; border-radius: 8px; cursor: pointer;">Submit Review</button>
+                            </form>
+                        </div>
+                    <?php elseif ($user_already_reviewed): ?>
+                        <div class="content" style="margin-top: 1.5rem; background: #faf8f5; border: 1px solid rgba(192, 144, 64, 0.1); border-radius: 12px; padding: 1.5rem; text-align: center;">
+                            <p style="color: #666; font-weight: 500; margin: 0;"><i class="fas fa-check-circle" style="color: var(--clr-success-text);"></i> You have already reviewed this pet sitter.</p>
+                        </div>
+                    <?php endif; ?>
+                <?php else: ?>
+                    <div class="content" style="margin-top: 1.5rem; text-align: center;">
+                        <p><a href="login.php" style="color: var(--clr-primary); font-weight: 600; text-decoration: none;">Log in</a> to leave a review.</p>
+                    </div>
+                <?php endif; ?>
             </div>
 
-            <div class="bottom">
-                <div class="left">
-                    <div class="content">
-                        <h2>About Me</h2>
-                        <p>Hi there! I'm Sarah, a passionate pet lover with over 5 years of professional pet sitting experience. I understand that your furry family members deserve the best care while you're away, and I'm here to provide exactly that.</p>
-                        <p>I offer personalized care for each pet, maintaining their routine and providing lots of love and attention. Whether it's daily walks, feeding schedules, or just companionship, I treat every pet as if they were my own.</p>
-                        <p>I'm available for both short-term and long-term sitting arrangements, and I always provide regular updates with photos so you can have peace of mind while you're away.</p>
-                    </div>
-                    <div class="content">
-                        <h2>Reviews (127)</h2>
-                        <div class="review">
-                            <h4>Mike Chen</h4>
-                            <p>“Sarah was amazing with our Golden Retriever, Max! She sent daily updates with photos and videos, and Max was so happy when we returned. Highly recommend!”</p>
-                        </div>
-                        <div class="review">
-                            <h4>Emma Wilson</h4>
-                            <p>“Perfect pet sitter! Sarah took excellent care of our two cats while we were on vacation. Very reliable and trustworthy. Will definitely book again!”</p>
-                        </div>
-                        <div class="review">
-                            <h4>David Park</h4>
-                            <p>“Sarah is wonderful! She took great care of our rescue dog who can be anxious with new people. Her patience and experience really showed. Thank you Sarah!”</p>
-                        </div>
-                        <a href="#reviews">View all reviews →</a>
-                    </div>
+            <div class="right">
+                <div class="content">
+                    <h2>Experience</h2>
+                    <div class="experience-item"><i class="fas fa-dog"></i><div><h4>Dogs</h4><p>Experienced care provider</p></div></div>
+                    <div class="experience-item"><i class="fas fa-cat"></i><div><h4>Cats</h4><p>Experienced care provider</p></div></div>
+                    <div class="experience-item"><i class="fas fa-dove"></i><div><h4>Birds</h4><p>Experienced care provider</p></div></div>
+                    <div class="experience-item"><i class="fas fa-fish"></i><div><h4>Small Animals</h4><p>Experienced care provider</p></div></div>
                 </div>
-
-                <div class="right">
-                    <div class="content">
-                        <h2>Experience</h2>
-                        <div class="experience-item"><i class="fas fa-dog"></i><div><h4>Dogs</h4><p>5+ years experience</p></div></div>
-                        <div class="experience-item"><i class="fas fa-cat"></i><div><h4>Cats</h4><p>4+ years experience</p></div></div>
-                        <div class="experience-item"><i class="fas fa-dove"></i><div><h4>Birds</h4><p>2+ years experience</p></div></div>
-                        <div class="experience-item"><i class="fas fa-fish"></i><div><h4>Small Animals</h4><p>3+ years experience</p></div></div>
-                    </div>
-                    <div class="content">
-                        <h2>Services Offered</h2>
-                        <ul class="services-list">
-                            <li>Pet Sitting</li>
-                            <li>Dog Walking</li>
-                            <li>Overnight Care</li>
-                            <li>Pet Transportation</li>
-                            <li>Basic Grooming</li>
-                        </ul>
-                    </div>
-                    <div class="content">
-                        <h2>Availability</h2>
-                        <div class="calendar">
-                            <h3>April 2026</h3>
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>Sun</th>
-                                        <th>Mon</th>
-                                        <th>Tue</th>
-                                        <th>Wed</th>
-                                        <th>Thu</th>
-                                        <th>Fri</th>
-                                        <th>Sat</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td class="empty"></td>
-                                        <td class="empty"></td>
-                                        <td class="empty"></td>
-                                        <td class="empty"></td>
-                                        <td class="available">1</td>
-                                        <td class="available">2</td>
-                                        <td class="available">3</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="available">4</td>
-                                        <td class="available">5</td>
-                                        <td class="available">6</td>
-                                        <td class="booked">7</td>
-                                        <td class="available">8</td>
-                                        <td class="available">9</td>
-                                        <td class="available">10</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="available">11</td>
-                                        <td class="available">12</td>
-                                        <td class="available">13</td>
-                                        <td class="booked">14</td>
-                                        <td class="available">15</td>
-                                        <td class="available">16</td>
-                                        <td class="available">17</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="available">18</td>
-                                        <td class="available">19</td>
-                                        <td class="available">20</td>
-                                        <td class="booked">21</td>
-                                        <td class="available">22</td>
-                                        <td class="available">23</td>
-                                        <td class="available">24</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="available">25</td>
-                                        <td class="available">26</td>
-                                        <td class="available">27</td>
-                                        <td class="booked">28</td>
-                                        <td class="available">29</td>
-                                        <td class="available">30</td>
-                                        <td class="empty"></td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
+                
+                <div class="content">
+                    <h2>Services Offered</h2>
+                    <ul class="services-list">
+                        <li>Pet Sitting</li>
+                        <li>Dog Walking</li>
+                        <li>Overnight Care</li>
+                        <li>Pet Transportation</li>
+                        <li>Basic Grooming</li>
+                    </ul>
+                </div>
+                
+                <div class="content">
+                    <h2>Availability</h2>
+                    <div class="calendar">
+                        <h3>June 2026</h3>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Sun</th>
+                                    <th>Mon</th>
+                                    <th>Tue</th>
+                                    <th>Wed</th>
+                                    <th>Thu</th>
+                                    <th>Fri</th>
+                                    <th>Sat</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="empty"></td>
+                                    <td class="available">1</td>
+                                    <td class="available">2</td>
+                                    <td class="available">3</td>
+                                    <td class="available">4</td>
+                                    <td class="available">5</td>
+                                    <td class="available">6</td>
+                                </tr>
+                                <tr>
+                                    <td class="available">7</td>
+                                    <td class="available">8</td>
+                                    <td class="available">9</td>
+                                    <td class="booked">10</td>
+                                    <td class="available">11</td>
+                                    <td class="available">12</td>
+                                    <td class="available">13</td>
+                                </tr>
+                                <tr>
+                                    <td class="available">14</td>
+                                    <td class="available">15</td>
+                                    <td class="available">16</td>
+                                    <td class="booked">17</td>
+                                    <td class="available">18</td>
+                                    <td class="available">19</td>
+                                    <td class="available">20</td>
+                                </tr>
+                                <tr>
+                                    <td class="available">21</td>
+                                    <td class="available">22</td>
+                                    <td class="available">23</td>
+                                    <td class="booked">24</td>
+                                    <td class="available">25</td>
+                                    <td class="available">26</td>
+                                    <td class="available">27</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
+</main>
 
-
-    </main>
-
-    <footer>
-        <div class="footer-container">
-            <div class="footer-col brand-col">
-                <h2><i class="fas fa-paw"></i> Petsitter's Market</h2>
-                <p>Connecting pet owners with<br>trusted caregivers since 2020.</p>
-            </div>
-            
-            <div class="footer-col">
-                <h3>Services</h3>
-                <a href="#">Pet Sitting</a>
-                <a href="#">Dog Walking</a>
-                <a href="#">Pet Grooming</a>
-                <a href="#">Vet Visits</a>
-            </div>
-
-            <div class="footer-col">
-                <h3>Company</h3>
-                <a href="#">About Us</a>
-                <a href="#">Contact</a>
-                <a href="#">Careers</a>
-                <a href="#">Privacy Policy</a>
-            </div>
-
-            <div class="footer-col">
-                <h3>Contact</h3>
-                <div class="contact-item">
-                    <i class="fas fa-phone-alt"></i> (555) 123-4567
-                </div>
-                <div class="contact-item">
-                    <i class="fas fa-envelope"></i> hello@petsittersmarket.com
-                </div>
-                <div class="social-icons">
-                    <a href="#"><i class="fab fa-facebook-f"></i></a>
-                    <a href="#"><i class="fab fa-instagram"></i></a>
-                    <a href="#"><i class="fab fa-twitter"></i></a>
-                </div>
-            </div>
-        </div>
-        <div class="footer-bottom">
-            &copy; 2026 Petsitter's Market. All rights reserved.
-        </div>
-    </footer>
-</body>
-</html>
+<?php require_once 'includes/footer.php'; ?>

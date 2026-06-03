@@ -10,6 +10,21 @@ $csrfToken = generateCsrfToken();
 $errorMsg = '';
 $successMsg = '';
 
+$namePreset = '';
+$emailPreset = '';
+
+if (isUserLoggedIn()) {
+    $currUser = getUserById($pdo, $_SESSION['user_id']);
+    if ($currUser) {
+        if (!empty($currUser['first_name']) || !empty($currUser['last_name'])) {
+            $namePreset = trim(($currUser['first_name'] ?? '') . ' ' . ($currUser['last_name'] ?? ''));
+        } else {
+            $namePreset = $currUser['username'] ?? '';
+        }
+        $emailPreset = $currUser['email'] ?? '';
+    }
+}
+
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     if (!validateCsrfToken($_POST['csrf_token'] ?? '')) {
@@ -25,8 +40,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         } elseif (!validateEmail($email)) {
             $errorMsg = "Le format de l'adresse email est invalide.";
         } else {
-            $req = $pdo->prepare("INSERT INTO contact_messages (nom, email, message) VALUES (?, ?, ?)");
-            $req->execute([$name, $email, $message]);
+            $req = $pdo->prepare("INSERT INTO contact_messages (name, email, subject, message) VALUES (?, ?, ?, ?)");
+            $req->execute([$name, $email, $subject, $message]);
 
             $successMsg = "Merci " . htmlspecialchars($name) . " ! Votre message a bien été envoyé. Nous vous répondrons rapidement.";
 
@@ -62,12 +77,12 @@ require_once 'includes/header.php';
 
             <div class="form-group">
                 <label for="name">Name</label>
-                <input type="text" id="name" name="name" placeholder="John Doe" value="<?php echo htmlspecialchars($_POST['name'] ?? ''); ?>" required>
+                <input type="text" id="name" name="name" placeholder="John Doe" value="<?php echo htmlspecialchars($_POST['name'] ?? $namePreset); ?>" required>
             </div>
 
             <div class="form-group">
                 <label for="email">Email</label>
-                <input type="email" id="email" name="email" placeholder="john@example.com" value="<?php echo htmlspecialchars($_POST['email'] ?? ''); ?>" required>
+                <input type="email" id="email" name="email" placeholder="john@example.com" value="<?php echo htmlspecialchars($_POST['email'] ?? $emailPreset); ?>" required>
             </div>
 
             <div class="form-group">
