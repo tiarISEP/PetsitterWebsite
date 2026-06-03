@@ -169,7 +169,11 @@ $csrf_token = generateCsrfToken();
                     <?php endif; ?>
                 </div>
                 
-                <a href="mailto:<?php echo htmlspecialchars($sitter['email']); ?>" class="primary-btn" style="text-decoration:none; text-align: center; width: 100%;">Send Message</a>
+                <?php if (isUserLoggedIn() && $_SESSION['user_id'] !== $petsitter_id): ?>
+                    <a href="messages.php?convo=<?php echo htmlspecialchars($sitter['public_id']); ?>" class="primary-btn" style="text-decoration:none; text-align: center; width: 100%;">Send Message</a>
+                <?php elseif (!isUserLoggedIn()): ?>
+                    <a href="login.php" class="primary-btn" style="text-decoration:none; text-align: center; width: 100%;">Log in to Contact</a>
+                <?php endif; ?>
             </div>
         </div>
 

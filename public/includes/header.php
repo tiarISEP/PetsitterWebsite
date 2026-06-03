@@ -52,18 +52,20 @@ $safeTitle = htmlspecialchars($pageTitle ?? "PetSitter's Market", ENT_QUOTES, 'U
                     <?php if ($header_user_type === 'pet-sitter'): ?>
                         <li><a href="searchupdate.php" class="<?php echo (basename($_SERVER['PHP_SELF']) == 'searchupdate.php') ? 'active' : ''; ?>">Find Jobs</a></li>
                         <li><a href="my_applications.php" class="<?php echo (basename($_SERVER['PHP_SELF']) == 'my_applications.php') ? 'active' : ''; ?>">My Applications</a></li>
-                        <li><a href="my_requests.php" class="<?php echo (basename($_SERVER['PHP_SELF']) == 'my_requests.php') ? 'active' : ''; ?>">Messages</a></li>
+                        <li><a href="messages.php" class="<?php echo (basename($_SERVER['PHP_SELF']) == 'messages.php') ? 'active' : ''; ?>">Messages</a></li>
                         <li><a href="profile.php" class="<?php echo (basename($_SERVER['PHP_SELF']) == 'profile.php') ? 'active' : ''; ?>">Profile</a></li>
                     <?php elseif ($header_user_type === 'pet-owner'): ?>
                         <li><a href="my_pets.php" class="<?php echo (basename($_SERVER['PHP_SELF']) == 'my_pets.php') ? 'active' : ''; ?>">Mes animaux</a></li>
                         <li><a href="my_ads.php" class="<?php echo (basename($_SERVER['PHP_SELF']) == 'my_ads.php') ? 'active' : ''; ?>">Mes annonces</a></li>
-                        <li><a href="my_requests.php" class="<?php echo (basename($_SERVER['PHP_SELF']) == 'my_requests.php') ? 'active' : ''; ?>">Messages</a></li>
+                        <li><a href="messages.php" class="<?php echo (basename($_SERVER['PHP_SELF']) == 'messages.php') ? 'active' : ''; ?>">Messages</a></li>
                         <li><a href="profile.php" class="<?php echo (basename($_SERVER['PHP_SELF']) == 'profile.php') ? 'active' : ''; ?>">Profil</a></li>
                     <?php elseif ($header_user_type === 'admin'): ?>
                         <li><a href="admin_dashboard.php" class="<?php echo (basename($_SERVER['PHP_SELF']) == 'admin_dashboard.php' && empty($_GET['section'])) ? 'active' : ''; ?>">Vue d'ensemble</a></li>
                         <li><a href="admin_dashboard.php?section=users" class="<?php echo (isset($_GET['section']) && $_GET['section'] == 'users') ? 'active' : ''; ?>">Utilisateurs</a></li>
                         <li><a href="admin_dashboard.php?section=ads" class="<?php echo (isset($_GET['section']) && $_GET['section'] == 'ads') ? 'active' : ''; ?>">Annonces</a></li>
                         <li><a href="admin_dashboard.php?section=messages" class="<?php echo (isset($_GET['section']) && $_GET['section'] == 'messages') ? 'active' : ''; ?>">Support</a></li>
+                    <?php elseif ($header_user_type === 'super-admin'): ?>
+                        <li><a href="super_admin_dashboard.php" class="<?php echo (basename($_SERVER['PHP_SELF']) == 'super_admin_dashboard.php') ? 'active' : ''; ?>">Super Admin</a></li>
                     <?php endif; ?>
                 </ul>
             </div>
@@ -130,12 +132,18 @@ $safeTitle = htmlspecialchars($pageTitle ?? "PetSitter's Market", ENT_QUOTES, 'U
             <a href="admin_dashboard.php?section=messages"><i class="fas fa-envelope"></i> Messages Support</a>
         <?php endif; ?>
 
+        <!-- Super Admin -->
+        <?php if ($header_user_type === 'super-admin'): ?>
+            <a href="super_admin_dashboard.php"><i class="fas fa-shield-alt"></i> Super Admin Panel</a>
+        <?php endif; ?>
+
         <!-- Pet Owner -->
         <?php if ($header_user_type === 'pet-owner'): ?>
             <a href="my_pets.php"><i class="fas fa-paw"></i> Mes animaux</a>
             <a href="my_ads.php"><i class="fas fa-bullhorn"></i> Mes annonces</a>
             <a href="PostAd.php"><i class="fas fa-plus-circle"></i> Créer une annonce</a>
             <a href="my_requests.php"><i class="fas fa-envelope-open-text"></i> Mes demandes de contact</a>
+            <a href="messages.php"><i class="fas fa-comment-dots"></i> Messagerie interne</a>
             <a href="FAQ.php"><i class="fas fa-question-circle"></i> FAQ</a>
         <?php endif; ?>
 
@@ -144,6 +152,7 @@ $safeTitle = htmlspecialchars($pageTitle ?? "PetSitter's Market", ENT_QUOTES, 'U
             <a href="searchupdate.php"><i class="fas fa-search"></i> Trouver des annonces</a>
             <a href="my_applications.php"><i class="fas fa-briefcase"></i> Mes candidatures</a>
             <a href="my_requests.php"><i class="fas fa-envelope-open-text"></i> Mes demandes</a>
+            <a href="messages.php"><i class="fas fa-comment-dots"></i> Messagerie interne</a>
             <a href="FAQ.php"><i class="fas fa-question-circle"></i> FAQ</a>
         <?php endif; ?>
 

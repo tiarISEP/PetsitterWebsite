@@ -6,3 +6,7 @@ public/composer.phar
 /public/vendor
 database/cgu_migration.sql
 database/petsitter_db_romain.sql
+database/add_public_id_migration.sql
+public/migrate_encrypt.php
+PUBLIC_ID_IMPLEMENTATION.md
+VERIFICATION_REPORT.md
