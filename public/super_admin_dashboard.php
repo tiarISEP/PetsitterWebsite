@@ -385,6 +385,30 @@ require_once 'includes/header.php';
 ?>
 <link rel="stylesheet" href="css/admin-dashboard.css">
 
+<style>
+    .adm-table th.sortable-header {
+        cursor: pointer;
+        user-select: none;
+        position: relative;
+        transition: background-color 0.15s ease;
+    }
+    .adm-table th.sortable-header:hover {
+        background-color: rgba(0, 0, 0, 0.06);
+    }
+    .sort-indicator {
+        display: inline-block;
+        margin-left: 6px;
+        font-size: 0.85rem;
+        color: #bbb;
+        vertical-align: middle;
+    }
+    .th-sort-asc .sort-indicator,
+    .th-sort-desc .sort-indicator {
+        color: var(--clr-brand, #2c3e50);
+        font-weight: bold;
+    }
+</style>
+
 <main id="main-content" class="container">
     <div class="admin-container">
         <aside class="admin-sidebar">
@@ -459,7 +483,6 @@ require_once 'includes/header.php';
                     </form>
                 </div>
 
-                <!-- Functional Search Bar component -->
                 <div class="search-panel" style="margin-top:2rem;">
                     <form method="GET" style="display:flex; gap:0.5rem; max-width:500px;">
                         <input type="hidden" name="section" value="user_management">
@@ -564,7 +587,6 @@ require_once 'includes/header.php';
                     </form>
                 </div>
 
-                <!-- Functional Search Bar component -->
                 <div class="search-panel" style="margin-top:2rem;">
                     <form method="GET" style="display:flex; gap:0.5rem; max-width:500px;">
                         <input type="hidden" name="section" value="admin_management">
@@ -599,7 +621,6 @@ require_once 'includes/header.php';
                                     <td><?php echo escapeOutput($u['username']); ?></td>
                                     <td><?php echo escapeOutput($u['email']); ?></td>
                                     <td>
-                                        <!-- Displays detailed state of deletion votes -->
                                         <?php if (!empty($u['pending_votes']) && $u['pending_votes'] > 0): ?>
                                             <span class="badge badge-banned" style="background-color:#e67e22;">
                                                 Pending Deletion (<?php echo (int)$u['pending_votes']; ?>/2 Votes)
@@ -634,7 +655,6 @@ require_once 'includes/header.php';
                                                 <?php endif; ?>
                                             </form>
                                             
-                                            <!-- Retract Deletion Vote structural form button -->
                                             <?php if (!empty($u['caller_has_voted']) && $u['caller_has_voted'] > 0): ?>
                                                 <form method="POST" class="inline-form" onsubmit="return confirm('Are you sure you want to retract your deletion vote for this admin account?');">
                                                     <input type="hidden" name="csrf_token" value="<?php echo escapeOutput($csrf_token); ?>">
@@ -644,14 +664,16 @@ require_once 'includes/header.php';
                                                 </form>
                                             <?php endif; ?>
 
-                                            <form method="POST" class="inline-form" onsubmit="return confirm('Are you sure? Administrative deletions require 2 Super Admin confirmations.');">
-                                                <input type="hidden" name="csrf_token" value="<?php echo escapeOutput($csrf_token); ?>">
-                                                <input type="hidden" name="admin_action" value="delete_user">
-                                                <input type="hidden" name="user_id" value="<?php echo $u['id']; ?>">
-                                                <button type="submit" class="btn-small btn-danger">
-                                                    <?php echo (!empty($u['pending_votes']) && $u['pending_votes'] > 0) ? "Confirm Vote ({$u['pending_votes']}/2)" : "Vote Delete"; ?>
-                                                </button>
-                                            </form>
+                                            <?php if ($u['id'] !== $_SESSION['user_id'] && (empty($u['caller_has_voted']) || $u['caller_has_voted'] == 0)): ?>
+                                                <form method="POST" class="inline-form" onsubmit="return confirm('Are you sure? Administrative deletions require 2 Super Admin confirmations.');">
+                                                    <input type="hidden" name="csrf_token" value="<?php echo escapeOutput($csrf_token); ?>">
+                                                    <input type="hidden" name="admin_action" value="delete_user">
+                                                    <input type="hidden" name="user_id" value="<?php echo $u['id']; ?>">
+                                                    <button type="submit" class="btn-small btn-danger">
+                                                        <?php echo (!empty($u['pending_votes']) && $u['pending_votes'] > 0) ? "Confirm Vote ({$u['pending_votes']}/2)" : "Vote Delete"; ?>
+                                                    </button>
+                                                </form>
+                                            <?php endif; ?>
                                         </div>
                                     </td>
                                 </tr>
@@ -664,7 +686,6 @@ require_once 'includes/header.php';
                 <h1 class="title-primary admin-title">Review Management</h1>
                 <p class="admin-subtitle">Monitor and manage platform reviews. Disable inappropriate content.</p>
 
-                <!-- Functional Search Bar component -->
                 <div class="search-panel" style="margin-top:1.5rem; margin-bottom:1rem;">
                     <form method="GET" style="display:flex; gap:0.5rem; max-width:500px;">
                         <input type="hidden" name="section" value="reviews">
@@ -789,9 +810,11 @@ require_once 'includes/header.php';
                     </div>
                     <div class="adm-table-wrap" style="border-radius:0 0 8px 8px;">
                         <table class="adm-table">
-                            <thead><tr>
-                                <th>ID</th><th>Question</th><th>Answer</th><th>Status</th><th style="text-align:right;">Actions</th>
-                            </tr></thead>
+                            <thead>
+                                <tr>
+                                    <th>ID</th><th>Question</th><th>Answer</th><th>Status</th><th style="text-align:right;">Actions</th>
+                                </tr>
+                            </thead>
                             <tbody>
                             <?php if (empty($cat_questions)): ?>
                                 <tr><td colspan="5" class="text-center-small">No questions yet.</td></tr>
@@ -851,9 +874,11 @@ require_once 'includes/header.php';
 
                 <div class="card" style="margin-top: 2rem; overflow-x: auto; padding: 0;">
                     <table class="adm-table">
-                        <thead><tr>
-                            <th>ID</th><th>Version</th><th>Section Title</th><th>Effective Date</th><th>Status</th><th style="text-align:right;">Actions</th>
-                        </tr></thead>
+                        <thead>
+                            <tr>
+                                <th>ID</th><th>Version</th><th>Section Title</th><th>Effective Date</th><th>Status</th><th style="text-align:right;">Actions</th>
+                            </tr>
+                        </thead>
                         <tbody>
                         <?php if (empty($cgu_versions)): ?>
                             <tr><td colspan="6" class="text-center-small">No CGU versions yet.</td></tr>
@@ -972,6 +997,86 @@ require_once 'includes/header.php';
         `;
         document.body.insertAdjacentHTML('beforeend', modal);
     }
+
+    // ── Client-Side Dynamic Table Column Sorting Engine ──
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('.adm-table').forEach(table => {
+            const headers = table.querySelectorAll('thead th');
+            
+            headers.forEach((headerCell, headerIndex) => {
+                // Skip structural columns like 'Actions' or explicitly right-aligned operational areas
+                if (headerCell.textContent.trim() === 'Actions' || headerCell.getAttribute('style')?.includes('text-align:right')) {
+                    return;
+                }
+                
+                // Set interactive CSS states
+                headerCell.classList.add('sortable-header');
+                
+                // Append neutral tracking indicator state arrow (↕)
+                const indicatorSpan = document.createElement('span');
+                indicatorSpan.className = 'sort-indicator';
+                indicatorSpan.textContent = ' ↕';
+                headerCell.appendChild(indicatorSpan);
+                
+                headerCell.addEventListener('click', () => {
+                    const tBody = table.tBodies[0];
+                    if (!tBody) return;
+                    
+                    const rows = Array.from(tBody.querySelectorAll('tr'));
+                    // Check if table contains a standard "No records found" fallback banner column
+                    if (rows.length === 1 && rows[0].querySelector('td')?.getAttribute('colspan')) {
+                        return;
+                    }
+                    
+                    const isCurrentlyAscending = headerCell.classList.contains('th-sort-asc');
+                    
+                    // Reset all sibling header element sorting classes inside current context table
+                    headers.forEach(th => {
+                        th.classList.remove('th-sort-asc', 'th-sort-desc');
+                        const ind = th.querySelector('.sort-indicator');
+                        if (ind) ind.textContent = ' ↕';
+                    });
+                    
+                    // Establish toggled arrangement sorting rules
+                    const chosenDirection = isCurrentlyAscending ? 'desc' : 'asc';
+                    headerCell.classList.add(`th-sort-${chosenDirection}`);
+                    indicatorSpan.textContent = chosenDirection === 'asc' ? ' ▲' : ' ▼';
+                    
+                    const dirModifier = chosenDirection === 'asc' ? 1 : -1;
+                    
+                    // Run sorting matrix across specific column index data type groups
+                    rows.sort((rowA, rowB) => {
+                        const cellA = rowA.children[headerIndex];
+                        const cellB = rowB.children[headerIndex];
+                        if (!cellA || !cellB) return 0;
+                        
+                        const textA = cellA.textContent.trim();
+                        const textB = cellB.textContent.trim();
+                        
+                        // Type 1: Numeric sort evaluation
+                        const numA = Number(textA.replace(/[^0-9.-]+/g, ""));
+                        const numB = Number(textB.replace(/[^0-9.-]+/g, ""));
+                        if (textA !== '' && textB !== '' && !isNaN(numA) && !isNaN(numB)) {
+                            return (numA - numB) * dirModifier;
+                        }
+                        
+                        // Type 2: Date handling fallback evaluation ("M j, Y" formats or timestamps)
+                        const timestampA = Date.parse(textA);
+                        const timestampB = Date.parse(textB);
+                        if (!isNaN(timestampA) && !isNaN(timestampB)) {
+                            return (timestampA - timestampB) * dirModifier;
+                        }
+                        
+                        // Type 3: Alpha-numeric case-insensitive string sorting matching local rules
+                        return textA.localeCompare(textB, undefined, {numeric: true, sensitivity: 'base'}) * dirModifier;
+                    });
+                    
+                    // Re-append sorted rows to the existing DOM tree elements securely
+                    tBody.append(...rows);
+                });
+            });
+        });
+    });
 </script>
 
 <?php require_once 'includes/footer.php'; ?>
