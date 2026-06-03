@@ -35,6 +35,10 @@ require_once 'includes/header.php';
                     <?php if (($user['user_type'] ?? '') === 'admin'): ?>
                         <li><a href="admin_dashboard.php" style="color: var(--clr-brand); font-weight: 600; text-decoration: none;">→ Admin Panel</a></li>
                     <?php endif; ?>
+                    <?php if (($user['user_type'] ?? '') === 'super-admin'): ?>
+                        <li><a href="super_admin_dashboard.php" style="color: var(--clr-brand); font-weight: 600; text-decoration: none;">→ Super Admin Panel</a></li>
+                    <?php endif; ?>
+
                     
                     <li><a href="logout.php" style="color: var(--clr-error-text); text-decoration: none; font-weight: 600;">Logout</a></li>
                 </ul>
