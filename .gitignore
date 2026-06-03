@@ -1,2 +1,8 @@
 .idea/
 .env
+public/composer.lock
+public/composer.json
+public/composer.phar
+/public/vendor
+database/cgu_migration.sql
+database/petsitter_db_romain.sql

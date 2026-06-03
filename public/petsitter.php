@@ -5,19 +5,32 @@ require_once 'auth.php';
 startSecureSession();
 
 // Get the petsitter identifier (can be public_id or numerical id)
-$sitter_id = $_GET['id'] ?? '';
+$sitter_id = trim($_GET['id'] ?? '');
 
 if (empty($sitter_id)) {
-    die("<h2 style='text-align:center; margin-top:50px;'>No sitter specified.</h2>");
+    header("Location: index.php");
+    exit();
+}
+
+// Relaxed validation: check if it's a UUID or numeric ID
+$is_uuid = preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i', $sitter_id);
+$is_numeric = is_numeric($sitter_id);
+
+if (!$is_uuid && !$is_numeric) {
+    header("Location: index.php");
+    exit();
 }
 
 // Fetch sitter info
-$stmt = $pdo->prepare("SELECT * FROM users WHERE (public_id = ? OR id = ?) AND user_type = 'pet-sitter'");
+$stmt = $pdo->prepare(
+    "SELECT * FROM users WHERE (public_id = ? OR id = ?) AND user_type = 'pet-sitter' AND is_banned = 0"
+);
 $stmt->execute([$sitter_id, $sitter_id]);
 $sitter = $stmt->fetch();
 
 if (!$sitter) {
-    die("<h2 style='text-align:center; margin-top:50px;'>Pet sitter not found.</h2>");
+    header("Location: index.php");
+    exit();
 }
 
 $petsitter_id = $sitter['id'];
@@ -123,6 +136,7 @@ $sitter_reviews = $stmt->fetchAll();
 
 $pageTitle = htmlspecialchars($sitter['first_name'] . ' ' . $sitter['last_name']) . "'s Profile | PetSitter's Market";
 require_once 'includes/header.php';
+$csrf_token = generateCsrfToken();
 ?>
 <script>
     // Dynamically apply petsitter-page class to body
@@ -155,7 +169,7 @@ require_once 'includes/header.php';
                     <?php endif; ?>
                 </div>
                 
-                <a href="mailto:<?php echo htmlspecialchars($sitter['email']); ?>" class="primary-btn" style="text-decoration:none; text-align: center; width: 100%;">Send Email</a>
+                <a href="mailto:<?php echo htmlspecialchars($sitter['email']); ?>" class="primary-btn" style="text-decoration:none; text-align: center; width: 100%;">Send Message</a>
             </div>
         </div>
 
@@ -200,17 +214,14 @@ require_once 'includes/header.php';
                             <?php endif; ?>
                             
                             <form method="POST" action="petsitter.php?id=<?php echo htmlspecialchars($sitter_id); ?>" class="auth-form" style="display: flex; flex-direction: column; gap: 1rem; margin-top: 1rem;">
-                                <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
+                                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrf_token); ?>">
                                 
-                                <div class="form-group" style="margin-bottom: 0;">
-                                    <label for="rating">Rating</label>
-                                    <select name="rating" id="rating" required style="width: 100%; padding: 0.8rem; border-radius: 8px; border: 1px solid #ddd; font-family: inherit;">
-                                        <option value="5">★★★★★ (5/5)</option>
-                                        <option value="4">★★★★☆ (4/5)</option>
-                                        <option value="3">★★★☆☆ (3/5)</option>
-                                        <option value="2">★★☆☆☆ (2/5)</option>
-                                        <option value="1">★☆☆☆☆ (1/5)</option>
-                                    </select>
+                                <div class="star-picker" id="star-picker">
+                                    <?php for ($i = 5; $i >= 1; $i--): ?>
+                                    <input type="radio" name="rating" id="star<?php echo $i; ?>" value="<?php echo $i; ?>"
+                                           <?php echo (isset($_POST['rating']) && (int)$_POST['rating'] === $i) ? 'checked' : ''; ?>>
+                                    <label for="star<?php echo $i; ?>" title="<?php echo $i; ?> star<?php echo $i > 1 ? 's' : ''; ?>">★</label>
+                                    <?php endfor; ?>
                                 </div>
                                 
                                 <div class="form-group" style="margin-bottom: 0;">
@@ -218,7 +229,10 @@ require_once 'includes/header.php';
                                     <textarea name="review_text" id="review_text" rows="4" placeholder="Share your experience with this pet sitter (min 10 characters)..." required style="width: 100%; padding: 0.8rem; border-radius: 8px; border: 1px solid #ddd; font-family: inherit; resize: vertical;"></textarea>
                                 </div>
                                 
-                                <button type="submit" name="submit_review" class="btn btn-primary" style="align-self: flex-start; padding: 0.75rem 1.5rem; border-radius: 8px; cursor: pointer;">Submit Review</button>
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:.5rem;">
+                                    <small style="color:#aaa;" id="char-count">0 / 250</small>
+                                    <button type="submit" name="submit_review" class="btn btn-primary" style="align-self: flex-start; padding: 0.75rem 1.5rem; border-radius: 8px; cursor: pointer;">Submit Review</button>
+                                </div>
                             </form>
                         </div>
                     <?php elseif ($user_already_reviewed): ?>
@@ -245,11 +259,11 @@ require_once 'includes/header.php';
                 <div class="content">
                     <h2>Services Offered</h2>
                     <ul class="services-list">
-                        <li>Pet Sitting</li>
-                        <li>Dog Walking</li>
-                        <li>Overnight Care</li>
-                        <li>Pet Transportation</li>
-                        <li>Basic Grooming</li>
+                        <li><i class="fas fa-check"></i> Pet Sitting</li>
+                        <li><i class="fas fa-check"></i> Dog Walking</li>
+                        <li><i class="fas fa-check"></i> Overnight Care</li>
+                        <li><i class="fas fa-check"></i> Pet Transportation</li>
+                        <li><i class="fas fa-check"></i> Basic Grooming</li>
                     </ul>
                 </div>
                 
@@ -314,5 +328,34 @@ require_once 'includes/header.php';
         </div>
     </div>
 </main>
+
+<style>
+.alert { padding:.85rem 1rem; border-radius:8px; margin-bottom:1rem; font-size:.9rem; }
+.alert-error   { background:#fee2e2; color:#b91c1c; border:1px solid #fca5a5; }
+.alert-success { background:#dcfce7; color:#166534; border:1px solid #86efac; }
+
+/* CSS-only star picker */
+.star-picker { display:flex; flex-direction:row-reverse; gap:.15rem; margin-bottom:.75rem; justify-content: flex-end; }
+.star-picker input { display:none; }
+.star-picker label {
+    font-size:1.8rem; cursor:pointer; color:#ddd;
+    transition:color .1s;
+}
+.star-picker input:checked ~ label,
+.star-picker label:hover,
+.star-picker label:hover ~ label { color:#d58337; }
+</style>
+
+<script>
+// Character counter for review textarea
+const ta = document.querySelector('textarea[name="review_text"]');
+const cc = document.getElementById('char-count');
+if (ta && cc) {
+    cc.textContent = ta.value.length + ' / 250';
+    ta.addEventListener('input', () => {
+        cc.textContent = ta.value.length + ' / 250';
+    });
+}
+</script>
 
 <?php require_once 'includes/footer.php'; ?>

@@ -141,6 +141,9 @@ require_once 'includes/header.php';
                 <label for="password">Password *</label>
                 <div class="password-wrapper" style="position: relative;">
                     <input type="password" id="password" name="password" placeholder="At least 12 characters (1 uppercase, 1 number)" required style="width: 100%;">
+                    <button class="password-toggle" type="button" aria-label="Toggle password visibility" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer;">
+                        <i class="fas fa-eye"></i>
+                    </button>
                 </div>
             </div>
 
@@ -148,6 +151,9 @@ require_once 'includes/header.php';
                 <label for="confirm_password">Confirm Password *</label>
                 <div class="password-wrapper" style="position: relative;">
                     <input type="password" id="confirm_password" name="confirm_password" placeholder="Confirm your password" required style="width: 100%;">
+                    <button class="password-toggle" type="button" aria-label="Toggle password visibility" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer;">
+                        <i class="fas fa-eye"></i>
+                    </button>
                 </div>
             </div>
 
@@ -164,5 +170,20 @@ require_once 'includes/header.php';
         </form>
     </div>
 </main>
+
+<script>
+document.querySelector('.password-toggle').addEventListener('click', function() {
+    const input = document.getElementById('password');
+    const icon = this.querySelector('i');
+    
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.replace('fa-eye', 'fa-eye-slash');
+    } else {
+        input.type = 'password';
+        icon.classList.replace('fa-eye-slash', 'fa-eye');
+    }
+});
+</script>
 
 <?php require_once 'includes/footer.php'; ?>
