@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+    <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -21,7 +21,9 @@
                     <li><a href="#">Find Sitters</a></li> <li><a href="#">About</a></li> <li><a href="ContactUs.php">Contact</a></li>
                     
                     <?php if(isset($_SESSION['user_id'])): ?>
-                        <li><a href="profile.php" class="btn-text">My Profile</a></li>                        <li><a href="logout.php" class="btn btn-cta">Logout</a></li>
+                        <li><a href="messages.php" class="btn-text">Messages</a></li>
+                        <li><a href="profile.php" class="btn-text">My Profile</a></li>
+                        <li><a href="logout.php" class="btn btn-cta">Logout</a></li>
                     <?php else: ?>
                         <li><a href="login.php" class="btn btn-text">Login</a></li>
                         <li><a href="signup.php" class="btn btn-cta">Sign Up</a></li>
