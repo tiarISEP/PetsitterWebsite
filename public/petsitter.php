@@ -4,27 +4,24 @@ require_once 'auth.php';
 
 startSecureSession();
 
-// Accept either ?id=5 or ?username=sarah_pawsome
-if (!empty($_GET['id'])) {
-    $petsitter_id = (int)$_GET['id'];
+// URL: petsitter.php?public_id=cce7446b-5e01-11f1-9246-581122c548ef
+if (!empty($_GET['public_id'])) {
+    $public_id = trim($_GET['public_id']);
+    
     $stmt = $pdo->prepare(
-        "SELECT id, username, first_name, last_name, bio, avatar_url, user_type, created_at
-         FROM users WHERE id = ? AND user_type = 'pet-sitter' AND is_banned = 0"
+        "SELECT id, public_id, username, first_name, last_name, bio, avatar_url, user_type, created_at
+         FROM users 
+         WHERE public_id = ? AND user_type = 'pet-sitter' AND is_banned = 0"
     );
-    $stmt->execute([$petsitter_id]);
-} elseif (!empty($_GET['username'])) {
-    $stmt = $pdo->prepare(
-        "SELECT id, username, first_name, last_name, bio, avatar_url, user_type, created_at
-         FROM users WHERE username = ? AND user_type = 'pet-sitter' AND is_banned = 0"
-    );
-    $stmt->execute([trim($_GET['username'])]);
-} else {
-    header("Location: index.php");
-    exit();
-}
+    $stmt->execute([$public_id]);
+    $petsitter = $stmt->fetch();
 
-$petsitter = $stmt->fetch();
-if (!$petsitter) {
+    if (!$petsitter) {
+        header("Location: index.php");
+        exit();
+    }
+
+} else {
     header("Location: index.php");
     exit();
 }
