@@ -7,10 +7,10 @@ startSecureSession();
 // URL: petsitter.php?public_id=cce7446b-5e01-11f1-9246-581122c548ef
 if (!empty($_GET['public_id'])) {
     $public_id = trim($_GET['public_id']);
-    
+
     $stmt = $pdo->prepare(
         "SELECT id, public_id, username, first_name, last_name, bio, avatar_url, user_type, created_at
-         FROM users 
+         FROM users
          WHERE public_id = ? AND user_type = 'pet-sitter' AND is_banned = 0"
     );
     $stmt->execute([$public_id]);

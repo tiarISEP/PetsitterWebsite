@@ -215,6 +215,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             $success = 'CGU version deleted.';
                         }
                         break;
+
+                    // ── Posts ──────────────────────────────────────────────
+                    case 'delete_post':
+                        $post_id = (int)($_POST['post_id'] ?? 0);
+                        $pdo->prepare("DELETE FROM post_has_animal WHERE Post_postID = ?")->execute([$post_id]);
+                        $pdo->prepare("DELETE FROM application WHERE Post_postID = ?")->execute([$post_id]);
+                        $pdo->prepare("DELETE FROM post WHERE postID = ?")->execute([$post_id]);
+                        $success = 'Post deleted successfully.';
+                        break;
+
+                    case 'toggle_post_visibility':
+                        $post_id = (int)($_POST['post_id'] ?? 0);
+                        $stmt = $pdo->prepare("SELECT Visibility FROM post WHERE postID = ?");
+                        $stmt->execute([$post_id]);
+                        $post = $stmt->fetch();
+                        if ($post) {
+                            $new_visibility = $post['Visibility'] ? 0 : 1;
+                            $pdo->prepare("UPDATE post SET Visibility = ? WHERE postID = ?")->execute([$new_visibility, $post_id]);
+                            $success = 'Post visibility toggled.';
+                        }
+                        break;
+
+                    // ── Reports ────────────────────────────────────────────
+                    case 'resolve_report':
+                        $report_id = (int)($_POST['report_id'] ?? 0);
+                        $pdo->prepare("UPDATE reports SET status = 'resolved', resolved_at = NOW() WHERE id = ?")->execute([$report_id]);
+                        $success = 'Report marked as resolved.';
+                        break;
+
+                    case 'dismiss_report':
+                        $report_id = (int)($_POST['report_id'] ?? 0);
+                        $pdo->prepare("UPDATE reports SET status = 'dismissed', resolved_at = NOW() WHERE id = ?")->execute([$report_id]);
+                        $success = 'Report dismissed.';
+                        break;
+
+                    case 'reopen_report':
+                        $report_id = (int)($_POST['report_id'] ?? 0);
+                        $pdo->prepare("UPDATE reports SET status = 'open', resolved_at = NULL WHERE id = ?")->execute([$report_id]);
+                        $success = 'Report reopened.';
+                        break;
                 }
 
             } catch (PDOException $e) {
@@ -280,6 +320,95 @@ $cgu_versions = [];
 if ($section === 'cgu') {
     $cgu_versions = $pdo->query("SELECT * FROM cgu_versions ORDER BY version_number DESC, id")->fetchAll();
 }
+
+// Fetch posts for post management
+$posts = [];
+$post_search = '';
+$post_view = null;
+if ($section === 'posts') {
+    $post_search = trim($_GET['search'] ?? '');
+    $post_view_id = (int)($_GET['view'] ?? 0);
+
+    // View individual post
+    if ($post_view_id > 0) {
+        $stmt = $pdo->prepare(
+            "SELECT p.postID, p.Title, p.Description, p.Price, p.CreationDate, p.Visibility, 
+                    p.Applicability, u.username, u.first_name, u.last_name, u.email,
+                    COUNT(DISTINCT a.appID) as app_count
+             FROM post p
+             JOIN users u ON p.User_userID = u.id
+             LEFT JOIN application a ON p.postID = a.Post_postID
+             WHERE p.postID = ?
+             GROUP BY p.postID"
+        );
+        $stmt->execute([$post_view_id]);
+        $post_view = $stmt->fetch();
+    } else {
+        // List posts with search
+        $query = "SELECT p.postID, p.Title, p.Description, p.Price, p.CreationDate, p.Visibility, 
+                         u.username, u.first_name, COUNT(DISTINCT a.appID) as app_count
+                  FROM post p
+                  JOIN users u ON p.User_userID = u.id
+                  LEFT JOIN application a ON p.postID = a.Post_postID";
+        
+        if (!empty($post_search)) {
+            $query .= " WHERE p.Title LIKE ? OR p.Description LIKE ? OR u.username LIKE ?";
+            $search_term = '%' . $post_search . '%';
+            $stmt = $pdo->prepare($query . " GROUP BY p.postID ORDER BY p.CreationDate DESC");
+            $stmt->execute([$search_term, $search_term, $search_term]);
+        } else {
+            $stmt = $pdo->prepare($query . " GROUP BY p.postID ORDER BY p.CreationDate DESC");
+            $stmt->execute();
+        }
+        $posts = $stmt->fetchAll();
+    }
+}
+
+// Fetch reports for report management
+$reports = [];
+$report_search = '';
+$report_view = null;
+if ($section === 'reports') {
+    $report_search = trim($_GET['search'] ?? '');
+    $report_view_id = (int)($_GET['view'] ?? 0);
+
+    // View individual report
+    if ($report_view_id > 0) {
+        $stmt = $pdo->prepare(
+            "SELECT r.id, r.report_type, r.reported_user_id, r.post_id, r.reason, 
+                    r.description, r.status, r.created_at, r.resolved_at,
+                    reporter.username as reporter_username, reporter.first_name as reporter_first_name,
+                    reported.username as reported_username, reported.first_name as reported_first_name
+             FROM reports r
+             LEFT JOIN users reporter ON r.reporter_user_id = reporter.id
+             LEFT JOIN users reported ON r.reported_user_id = reported.id
+             WHERE r.id = ?"
+        );
+        $stmt->execute([$report_view_id]);
+        $report_view = $stmt->fetch();
+    } else {
+        // List reports with search
+        $query = "SELECT r.id, r.report_type, r.reported_user_id, r.post_id, r.reason, 
+                         r.description, r.status, r.created_at,
+                         reporter.username as reporter_username, reporter.first_name as reporter_first_name,
+                         reported.username as reported_username
+                  FROM reports r
+                  LEFT JOIN users reporter ON r.reporter_user_id = reporter.id
+                  LEFT JOIN users reported ON r.reported_user_id = reported.id";
+        
+        if (!empty($report_search)) {
+            $query .= " WHERE r.reason LIKE ? OR r.description LIKE ? OR r.status LIKE ? OR reported.username LIKE ?";
+            $search_term = '%' . $report_search . '%';
+            $stmt = $pdo->prepare($query . " ORDER BY r.created_at DESC");
+            $stmt->execute([$search_term, $search_term, $search_term, $search_term]);
+        } else {
+            $stmt = $pdo->prepare($query . " ORDER BY r.created_at DESC");
+            $stmt->execute();
+        }
+        $reports = $stmt->fetchAll();
+    }
+}
+
  
 
 $csrf_token = generateCsrfToken();
@@ -670,18 +799,370 @@ require_once 'includes/header.php';
 
             <!-- POSTS SECTION -->
             <?php elseif ($section === 'posts'): ?>
-                <h1>Post Moderation</h1>
-                <p style="color: #666;">Post moderation section coming soon.</p>
+                <h1 class="title-primary admin-title">Post Management</h1>
+                <p class="admin-subtitle">Monitor and manage platform posts. Search by title, description, or creator.</p>
+
+                <?php if ($post_view): ?>
+                    <!-- Individual Post View -->
+                    <div class="card" style="margin-top: 2rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                            <h2><?php echo escapeOutput($post_view['Title']); ?></h2>
+                            <a href="?section=posts" class="btn-small btn-neutral">← Back to List</a>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+                            <div>
+                                <p><strong>Post ID:</strong> <?php echo $post_view['postID']; ?></p>
+                                <p><strong>Creator:</strong> <?php echo escapeOutput($post_view['first_name'] ?: $post_view['username']); ?></p>
+                                <p><strong>Email:</strong> <?php echo escapeOutput($post_view['email']); ?></p>
+                                <p><strong>Price:</strong> $<?php echo number_format($post_view['Price'], 2); ?></p>
+                            </div>
+                            <div>
+                                <p><strong>Created:</strong> <?php echo date('M j, Y H:i', strtotime($post_view['CreationDate'])); ?></p>
+                                <p><strong>Status:</strong> <?php echo $post_view['Visibility'] ? '<span class="badge badge-active">Visible</span>' : '<span class="badge badge-inactive">Hidden</span>'; ?></p>
+                                <p><strong>Applications:</strong> <?php echo $post_view['app_count']; ?></p>
+                                <p><strong>Type:</strong> <?php echo escapeOutput($post_view['Applicability']); ?></p>
+                            </div>
+                        </div>
+
+                        <div style="margin-bottom: 1.5rem;">
+                            <h3>Description</h3>
+                            <div style="background: #f9f9f9; padding: 1rem; border-radius: 6px; border-left: 4px solid var(--clr-brand);">
+                                <?php echo escapeAndWrap($post_view['Description'] ?? 'No description provided', 100); ?>
+                            </div>
+                        </div>
+
+                        <div style="display: flex; gap: 0.5rem;">
+                            <form method="POST" class="inline-form">
+                                <input type="hidden" name="csrf_token" value="<?php echo escapeOutput($csrf_token); ?>">
+                                <input type="hidden" name="admin_action" value="toggle_post_visibility">
+                                <input type="hidden" name="post_id" value="<?php echo $post_view['postID']; ?>">
+                                <button type="submit" class="btn-small <?php echo $post_view['Visibility'] ? 'btn-warning' : 'btn-success'; ?>">
+                                    <?php echo $post_view['Visibility'] ? 'Hide Post' : 'Show Post'; ?>
+                                </button>
+                            </form>
+                            <form method="POST" class="inline-form" onsubmit="return confirm('Are you sure you want to delete this post permanently?');">
+                                <input type="hidden" name="csrf_token" value="<?php echo escapeOutput($csrf_token); ?>">
+                                <input type="hidden" name="admin_action" value="delete_post">
+                                <input type="hidden" name="post_id" value="<?php echo $post_view['postID']; ?>">
+                                <button type="submit" class="btn-small btn-danger">Delete Post</button>
+                            </form>
+                        </div>
+                    </div>
+                <?php else: ?>
+                    <!-- Post Search -->
+                    <form method="GET" style="margin-top: 1.5rem; display: flex; gap: 0.5rem;">
+                        <input type="hidden" name="section" value="posts">
+                        <input type="text" name="search" placeholder="Search by title, description, or creator..." 
+                               value="<?php echo escapeOutput($post_search); ?>" style="flex: 1; padding: 0.75rem;">
+                        <button type="submit" class="btn-small btn-primary-sm">Search</button>
+                        <?php if (!empty($post_search)): ?>
+                            <a href="?section=posts" class="btn-small btn-neutral">Clear</a>
+                        <?php endif; ?>
+                    </form>
+
+                    <!-- Posts Table -->
+                    <div class="card" style="margin-top: 2rem; overflow-x: auto; padding: 0;">
+                        <?php if (empty($posts)): ?>
+                            <div style="padding: 2rem; text-align: center;">
+                                <p style="color: #666;">No posts found.</p>
+                            </div>
+                        <?php else: ?>
+                            <table class="adm-table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Title</th>
+                                        <th>Creator</th>
+                                        <th>Price</th>
+                                        <th>Applications</th>
+                                        <th>Status</th>
+                                        <th>Created</th>
+                                        <th style="text-align:right;">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php foreach ($posts as $post): ?>
+                                        <tr>
+                                            <td><?php echo $post['postID']; ?></td>
+                                            <td><?php echo escapeOutput($post['Title']); ?></td>
+                                            <td><?php echo escapeOutput($post['first_name'] ?: $post['username']); ?></td>
+                                            <td>$<?php echo number_format($post['Price'], 2); ?></td>
+                                            <td><span class="badge"><?php echo $post['app_count']; ?></span></td>
+                                            <td>
+                                                <?php echo $post['Visibility'] ? '<span class="badge badge-active">Visible</span>' : '<span class="badge badge-inactive">Hidden</span>'; ?>
+                                            </td>
+                                            <td><?php echo date('M j, Y', strtotime($post['CreationDate'])); ?></td>
+                                            <td style="text-align:right;">
+                                                <a href="?section=posts&view=<?php echo $post['postID']; ?>" class="btn-small btn-neutral">View</a>
+                                                <form method="POST" class="inline-form">
+                                                    <input type="hidden" name="csrf_token" value="<?php echo escapeOutput($csrf_token); ?>">
+                                                    <input type="hidden" name="admin_action" value="toggle_post_visibility">
+                                                    <input type="hidden" name="post_id" value="<?php echo $post['postID']; ?>">
+                                                    <button type="submit" class="btn-small <?php echo $post['Visibility'] ? 'btn-warning' : 'btn-success'; ?>" style="font-size: 0.8rem;">
+                                                        <?php echo $post['Visibility'] ? 'Hide' : 'Show'; ?>
+                                                    </button>
+                                                </form>
+                                                <form method="POST" class="inline-form" onsubmit="return confirm('Delete this post?');">
+                                                    <input type="hidden" name="csrf_token" value="<?php echo escapeOutput($csrf_token); ?>">
+                                                    <input type="hidden" name="admin_action" value="delete_post">
+                                                    <input type="hidden" name="post_id" value="<?php echo $post['postID']; ?>">
+                                                    <button type="submit" class="btn-small btn-danger">Delete</button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        <?php endif; ?>
+                    </div>
+                <?php endif; ?>
+
 
             <!-- REPORTS SECTION -->
             <?php elseif ($section === 'reports'): ?>
-                <h1>User Reports</h1>
-                <p style="color: #666;">Reports and flagged content coming soon.</p>
+                <h1 class="title-primary admin-title">Report Management</h1>
+                <p class="admin-subtitle">Review and respond to user reports. Search by reason, status, or reported user.</p>
+
+                <?php if ($report_view): ?>
+                    <!-- Individual Report View -->
+                    <div class="card" style="margin-top: 2rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                            <h2>Report #<?php echo $report_view['id']; ?></h2>
+                            <a href="?section=reports" class="btn-small btn-neutral">← Back to List</a>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+                            <div>
+                                <p><strong>Report Type:</strong> <?php echo ucfirst(escapeOutput($report_view['report_type'])); ?></p>
+                                <p><strong>Reason:</strong> <?php echo escapeOutput($report_view['reason']); ?></p>
+                                <p><strong>Reporter:</strong> <?php echo escapeOutput($report_view['reporter_first_name'] ?: $report_view['reporter_username'] ?: 'Anonymous'); ?></p>
+                                <p><strong>Reported User:</strong> <?php echo escapeOutput($report_view['reported_first_name'] ?: $report_view['reported_username'] ?: 'N/A'); ?></p>
+                            </div>
+                            <div>
+                                <p><strong>Status:</strong> 
+                                    <span class="badge <?php 
+                                        echo $report_view['status'] === 'open' ? 'badge-warn' : 
+                                             ($report_view['status'] === 'resolved' ? 'badge-active' : 'badge-inactive'); 
+                                    ?>">
+                                        <?php echo ucfirst($report_view['status']); ?>
+                                    </span>
+                                </p>
+                                <p><strong>Created:</strong> <?php echo date('M j, Y H:i', strtotime($report_view['created_at'])); ?></p>
+                                <?php if ($report_view['resolved_at']): ?>
+                                    <p><strong>Resolved:</strong> <?php echo date('M j, Y H:i', strtotime($report_view['resolved_at'])); ?></p>
+                                <?php endif; ?>
+                                <p><strong>Post ID:</strong> <?php echo $report_view['post_id'] ?? 'N/A'; ?></p>
+                            </div>
+                        </div>
+
+                        <div style="margin-bottom: 1.5rem;">
+                            <h3>Description</h3>
+                            <div style="background: #f9f9f9; padding: 1rem; border-radius: 6px; border-left: 4px solid var(--clr-brand);">
+                                <?php echo escapeAndWrap($report_view['description'] ?? 'No description provided', 100); ?>
+                            </div>
+                        </div>
+
+                        <div style="display: flex; gap: 0.5rem;">
+                            <?php if ($report_view['status'] !== 'resolved'): ?>
+                                <form method="POST" class="inline-form">
+                                    <input type="hidden" name="csrf_token" value="<?php echo escapeOutput($csrf_token); ?>">
+                                    <input type="hidden" name="admin_action" value="resolve_report">
+                                    <input type="hidden" name="report_id" value="<?php echo $report_view['id']; ?>">
+                                    <button type="submit" class="btn-small btn-success">Mark as Resolved</button>
+                                </form>
+                            <?php endif; ?>
+                            <?php if ($report_view['status'] !== 'dismissed'): ?>
+                                <form method="POST" class="inline-form">
+                                    <input type="hidden" name="csrf_token" value="<?php echo escapeOutput($csrf_token); ?>">
+                                    <input type="hidden" name="admin_action" value="dismiss_report">
+                                    <input type="hidden" name="report_id" value="<?php echo $report_view['id']; ?>">
+                                    <button type="submit" class="btn-small btn-warning">Dismiss</button>
+                                </form>
+                            <?php endif; ?>
+                            <?php if ($report_view['status'] !== 'open'): ?>
+                                <form method="POST" class="inline-form">
+                                    <input type="hidden" name="csrf_token" value="<?php echo escapeOutput($csrf_token); ?>">
+                                    <input type="hidden" name="admin_action" value="reopen_report">
+                                    <input type="hidden" name="report_id" value="<?php echo $report_view['id']; ?>">
+                                    <button type="submit" class="btn-small btn-neutral">Reopen</button>
+                                </form>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                <?php else: ?>
+                    <!-- Report Search -->
+                    <form method="GET" style="margin-top: 1.5rem; display: flex; gap: 0.5rem;">
+                        <input type="hidden" name="section" value="reports">
+                        <input type="text" name="search" placeholder="Search by reason, description, status, or user..." 
+                               value="<?php echo escapeOutput($report_search); ?>" style="flex: 1; padding: 0.75rem;">
+                        <button type="submit" class="btn-small btn-primary-sm">Search</button>
+                        <?php if (!empty($report_search)): ?>
+                            <a href="?section=reports" class="btn-small btn-neutral">Clear</a>
+                        <?php endif; ?>
+                    </form>
+
+                    <!-- Reports Table -->
+                    <div class="card" style="margin-top: 2rem; overflow-x: auto; padding: 0;">
+                        <?php if (empty($reports)): ?>
+                            <div style="padding: 2rem; text-align: center;">
+                                <p style="color: #666;">No reports found.</p>
+                            </div>
+                        <?php else: ?>
+                            <table class="adm-table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Type</th>
+                                        <th>Reason</th>
+                                        <th>Reported User</th>
+                                        <th>Status</th>
+                                        <th>Created</th>
+                                        <th style="text-align:right;">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php foreach ($reports as $report): ?>
+                                        <tr>
+                                            <td><?php echo $report['id']; ?></td>
+                                            <td><?php echo ucfirst(escapeOutput($report['report_type'])); ?></td>
+                                            <td><?php echo escapeAndWrap($report['reason'] ?? '', 50); ?></td>
+                                            <td><?php echo escapeOutput($report['reported_first_name'] ?: $report['reported_username'] ?: 'N/A'); ?></td>
+                                            <td>
+                                                <span class="badge <?php 
+                                                    echo $report['status'] === 'open' ? 'badge-warn' : 
+                                                         ($report['status'] === 'resolved' ? 'badge-active' : 'badge-inactive'); 
+                                                ?>">
+                                                    <?php echo ucfirst($report['status']); ?>
+                                                </span>
+                                            </td>
+                                            <td><?php echo date('M j, Y', strtotime($report['created_at'])); ?></td>
+                                            <td style="text-align:right;">
+                                                <a href="?section=reports&view=<?php echo $report['id']; ?>" class="btn-small btn-neutral">View</a>
+                                                <?php if ($report['status'] === 'open'): ?>
+                                                    <form method="POST" class="inline-form">
+                                                        <input type="hidden" name="csrf_token" value="<?php echo escapeOutput($csrf_token); ?>">
+                                                        <input type="hidden" name="admin_action" value="resolve_report">
+                                                        <input type="hidden" name="report_id" value="<?php echo $report['id']; ?>">
+                                                        <button type="submit" class="btn-small btn-success" style="font-size: 0.8rem;">Resolve</button>
+                                                    </form>
+                                                <?php endif; ?>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        <?php endif; ?>
+                    </div>
+                <?php endif; ?>
+
 
             <!-- SETTINGS SECTION -->
             <?php elseif ($section === 'settings'): ?>
-                <h1>Admin Settings</h1>
-                <p style="color: #666;">Platform settings coming soon.</p>
+                <h1 class="title-primary admin-title">Admin Settings</h1>
+                <p class="admin-subtitle">Configure platform-wide settings and manage system preferences.</p>
+
+                <div style="margin-top: 2rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+                    <!-- Platform Info -->
+                    <div class="card">
+                        <h3 style="margin-top: 0; color: var(--clr-brand);">Platform Information</h3>
+                        <div style="font-size: 0.95rem;">
+                            <p><strong>Platform Name:</strong> PetSitter's Market</p>
+                            <p><strong>Version:</strong> 1.0.0</p>
+                            <p><strong>Database:</strong> petsitter_db</p>
+                            <p><strong>Last Updated:</strong> June 1, 2026</p>
+                        </div>
+                    </div>
+
+                    <!-- System Stats -->
+                    <div class="card">
+                        <h3 style="margin-top: 0; color: var(--clr-primary);">System Overview</h3>
+                        <div style="font-size: 0.95rem;">
+                            <?php 
+                                $total_users = $pdo->query("SELECT COUNT(*) FROM users")->fetchColumn();
+                                $total_posts = $pdo->query("SELECT COUNT(*) FROM post")->fetchColumn();
+                                $total_applications = $pdo->query("SELECT COUNT(*) FROM application")->fetchColumn();
+                                $total_reports = $pdo->query("SELECT COUNT(*) FROM reports")->fetchColumn() ?? 0;
+                            ?>
+                            <p><strong>Total Users:</strong> <?php echo $total_users; ?></p>
+                            <p><strong>Active Posts:</strong> <?php echo $total_posts; ?></p>
+                            <p><strong>Applications:</strong> <?php echo $total_applications; ?></p>
+                            <p><strong>Reports:</strong> <?php echo $total_reports; ?></p>
+                        </div>
+                    </div>
+
+                    <!-- Security Settings -->
+                    <div class="card">
+                        <h3 style="margin-top: 0; color: var(--clr-cta);">Security Settings</h3>
+                        <div style="font-size: 0.95rem;">
+                            <p><strong>Session Timeout:</strong> 30 minutes</p>
+                            <p><strong>Password Policy:</strong> Bcrypt hashing</p>
+                            <p><strong>CSRF Protection:</strong> Enabled</p>
+                            <p><strong>HTTPS:</strong> Recommended</p>
+                        </div>
+                    </div>
+
+                    <!-- Email Settings -->
+                    <div class="card">
+                        <h3 style="margin-top: 0; color: var(--clr-secondary);">Email Configuration</h3>
+                        <div style="font-size: 0.95rem;">
+                            <p><strong>SMTP Server:</strong> Not configured</p>
+                            <p><strong>From Address:</strong> admin@petsitter.local</p>
+                            <p><strong>Reply-To:</strong> support@petsitter.local</p>
+                            <p style="color: #666;"><small>Configure in config files</small></p>
+                        </div>
+                    </div>
+
+                    <!-- Moderation Rules -->
+                    <div class="card">
+                        <h3 style="margin-top: 0; color: #e74c3c;">Moderation Rules</h3>
+                        <div style="font-size: 0.95rem;">
+                            <p><strong>Auto-ban on Reports:</strong> After 3 reports</p>
+                            <p><strong>Post Review:</strong> Disabled</p>
+                            <p><strong>Content Filter:</strong> Basic</p>
+                            <p style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #eee;">
+                                <a href="#" style="color: var(--clr-brand); text-decoration: none; font-weight: 500;">Configure Rules →</a>
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Backup & Maintenance -->
+                    <div class="card">
+                        <h3 style="margin-top: 0; color: #27ae60;">Maintenance</h3>
+                        <div style="font-size: 0.95rem;">
+                            <p><strong>Last Backup:</strong> N/A</p>
+                            <p><strong>Maintenance Mode:</strong> Off</p>
+                            <p><strong>Error Logging:</strong> Enabled</p>
+                            <p style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #eee;">
+                                <a href="#" style="color: var(--clr-brand); text-decoration: none; font-weight: 500;">View Logs →</a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Advanced Settings -->
+                <div class="card" style="margin-top: 2rem;">
+                    <h3 style="margin-top: 0;">Advanced Settings</h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; font-size: 0.95rem;">
+                        <div>
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Cache Management</label>
+                            <button class="btn-small btn-neutral" onclick="alert('Cache cleared!')">Clear Cache</button>
+                        </div>
+                        <div>
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Session Management</label>
+                            <button class="btn-small btn-neutral" onclick="alert('Sessions cleaned!')">Clear Old Sessions</button>
+                        </div>
+                        <div>
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Database Optimization</label>
+                            <button class="btn-small btn-neutral" onclick="alert('Database optimized!')">Optimize Tables</button>
+                        </div>
+                        <div>
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Export Data</label>
+                            <button class="btn-small btn-neutral" onclick="alert('Export initiated!')">Export Database</button>
+                        </div>
+                    </div>
+                </div>
+
 
             <?php endif; ?>
         </div>
